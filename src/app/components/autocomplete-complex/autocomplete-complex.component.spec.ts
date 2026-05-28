@@ -7,7 +7,7 @@ describe('AutoCompleteComplexComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AutoCompleteComplexComponent]
+      declarations: [AutoCompleteComplexComponent]
     }).compileComponents();
     fixture = TestBed.createComponent(AutoCompleteComplexComponent);
     component = fixture.componentInstance;

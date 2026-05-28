@@ -7,7 +7,7 @@ describe('StickyNotesComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [StickyNotesComponent]
+      declarations: [StickyNotesComponent]
     }).compileComponents();
     fixture = TestBed.createComponent(StickyNotesComponent);
     component = fixture.componentInstance;
