@@ -4,7 +4,7 @@
 - If the user says to implement the migration plan, the agent must assess, plan, and execute the v16→v17 migration end-to-end without pausing for confirmation.
 - The agent must accept changes and keep files in place.
 - The agent must stop only after migration to v17 is completed.
-- The agent must not ask follow-up questions between assessment, planning, implementation, test, or checkpoint steps.
+- The agent must not ask follow-up questions between assessment, planning, implementation, test, or checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) steps.
 name: Angular Migration Assessment
 description: >
   Analyzes an Angular project to assess its readiness for the v16 -> v17 migration.
@@ -52,3 +52,10 @@ tasks:
       - Run `npm audit --json` and include a short, human-readable summary in the assessment report.
       - Inspect `package.json` for `engines.node` and compare with the local Node runtime; record mismatches and suggested non-invasive workarounds.
     output: `report/assessment_report.md`
+
+
+### Orchestration Polish & Actionability
+- **Minor Orchestration Polish:** Ensure automated hand-offs between assessment, planning, implementation, testing, and documentation are flawlessly executed. Maintain near perfection in error recovery and state management.
+- **Atomic & Actionable Outputs:** All generated plans and reports must be atomic, isolated per version, and actionable.
+- **Richer Diagnostics & File-Level Diffs:** Include comprehensive diagnostics on any failure. Retain file-level diffs (unified patches) to provide clear visibility into modifications.
+- **Remediation Steps:** Alongside any identified error or warning, explicitly document the specific remediation steps required to resolve the issue.

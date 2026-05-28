@@ -16,13 +16,13 @@ This agent is now authoritative for Angular **v16 -> v17 only** in this workspac
 - **No-Stall Rule:** Ensure that the planning process does not stall by continuously assessing progress and adjusting tasks as necessary.
 - **Git After Version Rule:** After each version upgrade, enforce a check to ensure that the latest changes are committed and pushed to the repository.
 
-Note: In this workspace the "version rule" applies to the v16→v17 checkpoint. Further version checkpoints are historical recommendations.
+Note: In this workspace the "version rule" applies to the v16→v17 checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints). Further version checkpoints are historical recommendations.
 
 ### Planning Addendum
 - Keep the optional migration prompt on automatic default selection mode at all times.
 - Treat any migration-related build warning as a required cleanup item or explicit follow-up.
 - Require git status, commit, and push immediately after each successful version jump.
-- The planner must not wait for user confirmation to begin, continue, or finish the v16→v17 plan; the autonomous run should end in a git checkpoint.
+- The planner must not wait for user confirmation to begin, continue, or finish the v16→v17 plan; the autonomous run should end in a git checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints).
    - Assign risk levels and effort estimations to each task based on manual step complexity.
   - Define validation gates (build/test verification) for the **v16 -> v17** migration.
 2. Validate that the plan follows the strict incremental sequence.
@@ -33,13 +33,13 @@ The Planning Agent's first responsibility is to ingest the `assessment_report.md
 ### Per-Version Migration Plans (Markdown):
   - Active (v16→v17): generate `plan/migration_v16_to_v17.md` — v16→v17 migration with its own gates, rollback, and success criteria.
   - **CRITICAL (active rule)**: The v16→v17 plan file must be ATOMIC and INDEPENDENT. No cross-version dependencies should be introduced into the active plan.
-  - Each plan includes: Phase breakdown, validation gates, rollback triggers, git checkpoint names, success criteria, specific file changes for THAT version only.
+  - Each plan includes: Phase breakdown, validation gates, rollback triggers, git checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) names, success criteria, specific file changes for THAT version only.
   - Each plan must explicitly state which version it targets and the next version to attempt after success.
 ### Master Index (Markdown):
   - Generated in `plan/migration_plan.md` — Lists the version-specific plan with brief descriptions.
   - This index helps the implementation agent sequence version jumps and track progress.
 ### Rationale: 
-User experienced midway migration failure. Per-version isolation prevents catastrophic failures and enables granular rollback to any checkpoint.
+User experienced midway migration failure. Per-version isolation prevents catastrophic failures and enables granular rollback to any checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints).
 
 ### Core Risk Analysis
 A detailed breakdown of risks identified during assessment:
@@ -107,7 +107,7 @@ A detailed breakdown of risks identified during assessment:
 A robust rollback strategy is critical for maintaining stability during a complex migration. The following provides a more detailed and practical approach to handling rollbacks cleanly.
 
 - **Granular Commits:** Each migration step (e.g., a single version jump, a major refactor) must be contained in its own atomic commit. This allows for precise rollbacks without losing unrelated work.
-- **Branching Model:** Instead of using tags for checkpoints, the agent should commit to the main branch n not extra branches with clear commit messages that indicate the checkpoint (e.g., `chore(migration): complete Angular v17`). This way, the commit history itself serves as the checkpoint system.
+- **Branching Model:** Instead of using tags for checkpoints(never use tags n branches for checkpoints; only check commits for checkpoints), the agent should commit to the main branch n not extra branches with clear commit messages that indicate the checkpoint. This way, the commit history itself serves as the checkpoint system.
 - **Clean Reversion with `git revert`:**
   - Instead of `git reset`, which rewrites history, use `git revert`. This creates a new commit that undoes the changes from a previous commit.
   - **Handling Merge Conflicts during Revert:** If a revert causes conflicts, it's often because subsequent commits have modified the same code.
@@ -162,18 +162,18 @@ The final output is the `migration_plan.md`, which includes:
 
 ### Checkpoint & Rollback Addendum (Commit-first policy)
 
-- Policy: The authoritative migration checkpoint must be a commit on `main` (commit message + commit hash). Do NOT create or rely on git tags as the canonical checkpoint.
+- Policy: The authoritative migration checkpoint must be a commit on `main` (commit message + commit hash). Do NOT create or rely on git tags as the canonical checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints).
 - Automated rollback guidance:
-  1. Locate the checkpoint commit by commit message: `git rev-list -n 1 --grep="chore(migration): complete Angular v17" --all`
-  2. Reset to the checkpoint commit: `git reset --hard <commit-hash>`
+  1. Locate the checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) commit by commit message: `git rev-list -n 1 --grep="chore(migration): complete Angular v17" --all`
+  2. Reset to the checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) commit: `git reset --hard <commit-hash>`
   3. Clean and reinstall: `npx rimraf node_modules package-lock.json && npm install`
 
-- Notes: If any existing text references a tag-based reset (e.g., `git reset --hard <tag>`) or similar tag-based operations, replace the tag usage with a commit-hash based reset. Compute the checkpoint commit (e.g., via `git rev-list -n 1 --grep="chore(migration): complete Angular v17" --all`) and run `git reset --hard <git_checkpoint_commit>`. Store `git_checkpoint_commit` (short hash) in the plan metadata for deterministic automation.
+- Notes: If any existing text references a tag-based reset (e.g., `git reset --hard <tag>`) or similar tag-based operations, replace the tag usage with a commit-hash based reset. Compute the checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) commit (e.g., via `git rev-list -n 1 --grep="chore(migration): complete Angular v17" --all`) and run `git reset --hard <git_checkpoint_commit>`. Store `git_checkpoint_commit` (short hash) in the plan metadata for deterministic automation.
 
 
 ### Diagnostics & File-Diff Policy
 
-- **File-Level Diffs:** For every automated change, persist a unified patch to `report/patches/<timestamp>-<phase>.diff` using `git diff --staged --patch`. Record the list of modified files in the checkpoint artifact.
+- **File-Level Diffs:** For every automated change, persist a unified patch to `report/patches/<timestamp>-<phase>.diff` using `git diff --staged --patch`. Record the list of modified files in the checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) artifact.
 - **Focused Build Diagnostics:** On build/test failures, capture and attach a focused diagnostic bundle containing: `ng build` output, the exact failing file path(s), and a 5-line context snippet (3 lines before, failing line, 1 line after). Save as `report/diagnostics/<timestamp>-<error-slug>.md`.
 - **Known-Issue Mapping:** Maintain a lightweight mapping of common error signatures to remediation recipes (e.g., `NG6008` → standalone component import fix). When a signature is matched, include the suggested fix and a link to the relevant example from the repository (file and snippet) in the diagnostic bundle.
 - **Automated Patch Proposal:** Where safe, the agent should generate a candidate patch file (not auto-applied) and attach it to the diagnostic bundle for human review. The patch must be stored in `report/patches/proposed/<timestamp>-proposal.diff` and be included with the failure report.
@@ -181,7 +181,13 @@ The final output is the `migration_plan.md`, which includes:
 ### Autonomous Invocation & Strict Enforcement (Append Only)
 - When `implement the migration plan` is issued, the Planning Agent MUST execute automatically to produce or refresh `plan/migration_v16_to_v17.md` and any required per-component checklists. No user confirmation is allowed.
 - The Planning Agent must record the progress update: "package files updated and timer-based components fixed to trigger change detection" in its planning memory and include the two next-step options (A and B) in the plan metadata.
-- The plan must include a mandatory checkpoint sequence that the Implementation Agent will follow: `npm install`, `ng build`, `ng test -- --watch=false`, `git status`, `git add -A`, `git commit -m "chore(migration): complete Angular v17"`, `git push`.
+- The plan must include a mandatory checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) sequence that the Implementation Agent will follow: `npm install`, `ng build`, `ng test -- --watch=false`, `git status`, `git add -A`, `git commit -m "chore(migration): complete Angular v17"`, `git push`.
+
+### Orchestration Polish & Actionability
+- **Minor Orchestration Polish:** Ensure automated hand-offs between assessment, planning, implementation, testing, and documentation are flawlessly executed. Maintain near perfection in error recovery and state management.
+- **Atomic & Actionable Outputs:** All generated plans and reports must be atomic, isolated per version, and actionable.
+- **Richer Diagnostics & File-Level Diffs:** Include comprehensive diagnostics on any failure. Retain file-level diffs (unified patches) to provide clear visibility into modifications.
+- **Remediation Steps:** Alongside any identified error or warning, explicitly document the specific remediation steps required to resolve the issue.
 
 ### Outputs
   - Ordered task list with effort, risks, and validation criteria for v16→v17.

@@ -61,9 +61,15 @@ Within this combined framework, the implementation logic is enhanced with greate
 
 	1. Ensure sub-agents create a commit with a conventional message (e.g., `chore(migration): complete Angular v17`).
 	2. Verify the commit is pushed: `git push origin HEAD`.
-	3. Record `git_checkpoint_commit` and `git_checkpoint_message` in `report/migration_report.md`.
+	3. Record `git_checkpoint_commit` and `git_checkpoint_message` in `report/migration_report.md`.(never use tags n branches for checkpoints; only check commits for checkpoints)
 
-- Any reference to a human-friendly checkpoint label in this file is informational only. The Master Agent must compute and record the corresponding commit hash as `git_checkpoint_commit` for automated operations and must not rely on tags as checkpoints.
+- Any reference to a human-friendly checkpoint label in this file is informational only. The Master Agent must compute and record the corresponding commit hash as `git_checkpoint_commit` for automated operations and must not rely on tags as checkpoints(never use tags n branches for checkpoints; only check commits for checkpoints).
+
+### Orchestration Polish & Actionability
+- **Minor Orchestration Polish:** Ensure automated hand-offs between assessment, planning, implementation, testing, and documentation are flawlessly executed. Maintain near perfection in error recovery and state management.
+- **Atomic & Actionable Outputs:** All generated plans and reports must be atomic, isolated per version, and actionable.
+- **Richer Diagnostics & File-Level Diffs:** Include comprehensive diagnostics on any failure. Retain file-level diffs (unified patches) to provide clear visibility into modifications.
+- **Remediation Steps:** Alongside any identified error or warning, explicitly document the specific remediation steps required to resolve the issue.
 
 ### MUST INCLUDE: OUTPUT
 - **Master Migration Report (file):** report/migration_report.md

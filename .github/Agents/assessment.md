@@ -17,7 +17,7 @@ This agent now focuses on assessing readiness for the single, atomic upgrade fro
 - **Manual Verification:** Explicitly check for all manual conversion steps listed in the provided migration manual for every phase.
 - **Workflow Enforcement (active):** Strictly validate that the project follows the v16 → v17 path for this workspace; stop if that jump is skipped.
 
-Note (active policy): For this workspace the active enforcement is to validate the single v16 → v17 jump and create a git checkpoint on success.
+Note (active policy): For this workspace the active enforcement is to validate the single v16 → v17 jump and create a git checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) on success.
 - **Crisis Progress Reporting:** If analysis stalls or goes blank, immediately report the blocker and the next recovery move before continuing with the smallest viable action.
 - **Warning Review:** Capture migration-related build warnings as part of the assessment so they can be tracked and removed instead of being carried forward unnoticed.
 - **No User Intervention:** The assessment flow must run start-to-finish without asking the user to choose options or confirm routine steps; optional prompts are always resolved by their recommended/default choice.
@@ -32,7 +32,7 @@ Note (active policy): For this workspace the active enforcement is to validate t
 ### What's and What Nots
 
 #### What it Does (What's)
-- **Strict Incremental Analysis:** Enforces a strict, sequential version-by-version migration path (e.g., v16 -> v17, v17 -> v18).
+- **Strict Incremental Analysis:** Enforces a strict, sequential version-by-version migration path,strictly v16 -> v17 only
 - **Automated Detection:** Automatically scans for and flags issues that will cause build failures or runtime errors.
 
 Clarification: In this workspace the "Strict Incremental Analysis" should be read as "perform a strict analysis for the v16 -> v17 jump only." The automated detection will prioritize issues known to be relevant to v16→v17.
@@ -94,6 +94,12 @@ git_checkpoint_commit: "$(git rev-parse --short HEAD)"
 ### Richer Diagnostics & Actionable Reporting (Append Only)
 - **File-Level Diagnostics:** Every identified issue in the assessment report must include exact file paths, line numbers, and a one-liner remediation command.
 - **Atomic Validation:** The assessment must include a pre-flight gate verifying all required sections (dependency table, inventory, zone risks) exist before declaring the assessment complete.
+
+### Orchestration Polish & Actionability
+- **Minor Orchestration Polish:** Ensure automated hand-offs between assessment, planning, implementation, testing, and documentation are flawlessly executed. Maintain near perfection in error recovery and state management.
+- **Atomic & Actionable Outputs:** All generated plans and reports must be atomic, isolated per version, and actionable.
+- **Richer Diagnostics & File-Level Diffs:** Include comprehensive diagnostics on any failure. Retain file-level diffs (unified patches) to provide clear visibility into modifications.
+- **Remediation Steps:** Alongside any identified error or warning, explicitly document the specific remediation steps required to resolve the issue.
 
 ### Outputs
 - **Migration Assessment Report (Markdown):** 
