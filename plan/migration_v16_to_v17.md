@@ -1,3 +1,46 @@
+# Migration plan: Angular 16 → 17
+
+Scope: atomic migration for this repository from Angular v16 to v17 only.
+
+Phases
+1. Assessment
+   - Inventory project dependencies and components
+   - Record current package versions and potential blockers
+
+2. Preparation
+   - Create a dedicated branch or checkpoint (policy: commit to `main` after successful validation)
+   - Update `package.json` devDependencies and dependencies to `^17` where applicable
+   - Run `npm install`
+
+3. Automatic migration
+   - Run `npx @angular/cli@17 ng update @angular/core@17 @angular/cli@17` and accept default prompts
+   - Run any recommended schematic migrations
+
+4. Manual fixes
+   - Address compile errors and deprecations reported by the update
+   - Update code patterns flagged by TypeScript or Angular tests
+
+5. Validation
+   - `ng build` (production)
+   - `ng test --watch=false`
+   - Linting (if configured)
+
+6. Checkpoint
+   - `git add -A && git commit -m "chore(migration): complete Angular v17 migration"`
+   - `git push origin HEAD`
+
+7. Reporting
+   - Produce `report/assessment_report.md`, `report/implementation_log.md`, `report/test_report.md`, `report/css_report.md`, `docs/documentation.md`, and `report/migration_report.md` with details and commit hash
+
+Validation gates (must pass to commit)
+- `ng build` succeeds without fatal errors
+- Unit tests run (or targeted specs pass after triage)
+
+Rollback
+- If validation fails and cannot be fixed within small iterations, revert local changes and reset to previous commit. Use the checkpoint commit hash for recovery.
+
+Notes
+- This plan is atomic: only this version's changes are made. Do not attempt other version jumps in the same run.
 # Migration Plan: Angular v16 → v17
 
 ## Executive Summary
