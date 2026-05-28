@@ -2,12 +2,6 @@
 
 This file contains the combined logic, responsibilities, and workflows of all migration sub-agents, specialized for the active v16→v17 migration in this workspace.
 
-### Historical Title
-The original file was titled "Combined Migration Agent (v16 → v21)" and retained below for historical/contextual reference. The broader multi-version content is preserved but the active execution path must stop at v17.
-
-### Scope Specialization
-This combined agent is now authoritative for Angular **v16 -> v17 only** in this workspace specialization. The broader v16 -> v21 wording remains for reference, but the active execution path must stop at v17.
-
 
 ## SECTION 7: MASTER MIGRATION AGENT
 # Migration Agent (Angular 16 → 17)
@@ -42,7 +36,6 @@ The Master Migration Agent acts as the central nervous system for the entire mig
 - **Data Flow Management:** It manages the flow of artifacts between agents. For example, it takes the `assessment_report.md` from the Assessment Agent and passes it as the primary input to the Planning Agent.
 - **Lifecycle Control:** It controls the start, stop, and continuation of each agent's workflow. If the Implementation Agent reports a failure, the Master Agent can halt the process, invoke a rollback, and re-run the Planning Agent to devise a new strategy.
 - **Git Completion Gate:** After every successful version jump, the Master Agent must require a git status check, commit, and push before allowing the next version jump to start.
-- **Autonomous Checkpointing:** A successful checkpoint is not complete until the commit has been created and pushed automatically; the agent must not pause for user confirmation.
 
 ### Enhanced Implementation Agent Functionality
 Within this combined framework, the implementation logic is enhanced with greater power and responsibility, all under the direct supervision of the Master Agent:
@@ -61,21 +54,20 @@ Within this combined framework, the implementation logic is enhanced with greate
 - **Documentation Agent Management:** The Master Agent continuously provides the `documentation.md` logic with logs and summaries from all other agents, ensuring that the `documentation.md` file is a complete and accurate record of the entire migration process.
 
 
-### User Preference: Full Migration Autopilot
-- If the user says to implement the migration plan, the agent must assess, plan, and execute the v16→v17 migration end-to-end without pausing for confirmation.
-- The agent must accept changes and keep files in place.
-- The agent must stop only after migration to v17 is completed.
-- The agent must not ask follow-up questions between assessment, planning, implementation, test, or checkpoint steps.
+### Active Automation Directive
+	- The Master Migration Agent (combined agent) MUST, on `implement the migration plan`, orchestrate the assessment, planning, implementation, testing, and documentation agents to perform the v16→v17 migration fully autonomously. It must ensure the system accepts code changes, commits and pushes checkpoints (never use tags n branches for checkpoints; only check commits for checkpoints) and records the authoritative checkpoint as `git_checkpoint_commit` (short hash) together with `git_checkpoint_message`, and reports final status without pausing for user interaction. Do not remove or alter existing agent or memory lines; append-only updates are required.
 
-### must include OUTPUT
-- **Report:** `report/migration_report.md` (master combined migration summary)
-- **Total number of components present:** (agent-discovered integer)
-- **Total number of components migrated:** (agent-updated integer)
-- **Total number of components pending migration:** (agent-computed integer)
-- **Migration completion percentage:** (computed as migrated/total * 100)
-- **Spec files present:** (number of `*.spec.ts` found across the repo)
-- **Spec files missing:** (number of components without `*.spec.ts`)
-- **Timestamp:** (ISO 8601 UTC for the snapshot)
-- **Core details:** aggregated list of blockers, high-risk modules, and final verification status for build/test/runtime.
+### Checkpoint Policy Addendum (Master Agent)
 
-- **Spec requirement:** The combined agent enforces that every component includes a `<component>.component.spec.ts` and that the unit-testing agent discovers and runs all `*.spec.ts` during validation.
+	1. Ensure sub-agents create a commit with a conventional message (e.g., `chore(migration): complete Angular v17`).
+	2. Verify the commit is pushed: `git push origin HEAD`.
+	3. Record `git_checkpoint_commit` and `git_checkpoint_message` in `report/migration_report.md`.
+
+- Any reference to a human-friendly checkpoint label in this file is informational only. The Master Agent must compute and record the corresponding commit hash as `git_checkpoint_commit` for automated operations and must not rely on tags as checkpoints.
+
+### MUST INCLUDE: OUTPUT
+- **Master Migration Report (file):** report/migration_report.md
+- **Total Components Present (project):** (aggregated from assessment inventory)
+- **Total Components Migrated (project):** (aggregated from implementation logs)
+- **Overall Migration Completion Percentage:** (computed from aggregated metrics)
+- **Per-Agent Outputs:** assessment_report.md, css_report.md, implementation_log.md, test_report.md, docs/documentation.md

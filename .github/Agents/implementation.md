@@ -44,53 +44,56 @@ Note (active policy): For this workspace the implementation agent will only exec
 3. Log all actions and resulting build statuses.
 
 ### Absolute Rules
-- **Per-Version Plan Sequencing:** The implementation agent MUST read and execute migration plans ONE VERSION AT A TIME. Do NOT attempt all 5 versions in a single execution loop. Workflow: (1) Read `plan/migration_v16_to_v17.md`, (2) Execute all tasks fully, (3) Run `git status`, commit, and push to create a checkpoint, (4) Then read `plan/migration_v17_to_v18.md` and repeat. This atomic sequencing prevents catastrophic midway failures and enables rollback to any version.
-    1.  **Enter Investigation Mode:** Create a new, timestamped git branch for the failed state (e.g., `migration-failure/v17-to-v18-some-error-20260511T103000Z`).
-    2.  **Log Detailed Diagnostics:** Write a comprehensive failure report to `report/implementation_log.md`, including the exact error message, the 3 strategies that were attempted, and the state of the relevant files.
-    3.  **Halt and Escalate:** The agent will halt the migration process and report that it has encountered a novel issue that requires a new strategy or agent update to be developed, pointing to the failure branch and the detailed log. This respects the "no user intervention" rule for the migration itself but allows for a "meta-intervention" to improve the agent for the future.
-- **Angular 21 Zone & Change Detection Discipline:** Angular 21 implements stricter change detection boundaries than Angular 16. Any component that updates data outside Angular's zone (e.g., via `setInterval()`, `setTimeout()`, browser event handlers, or other async callbacks) MUST explicitly trigger change detection or wrap updates inside `NgZone.run()`. Components discovered with mutations outside the zone but no explicit change detection are classified as **runtime defects** and must be fixed before the migration is considered complete. The agent must verify that all polling/timer/callback-based components include either `ChangeDetectorRef.markForCheck()` after mutations or use `NgZone.run()` to keep operations inside Angular's zone. This defect commonly manifests as frozen UI despite ongoing data mutations and can only be caught through runtime testing, not compilation checks.
+- **Single-Plan Sequencing:** The implementation agent MUST read and execute the Angular 16 → 17 migration plan only. Do not attempt to broaden the work into other version jumps.
+  1.  **Enter Investigation Mode:** Create a new, timestamped git branch for the failed state if the final jump fails.
+  2.  **Log Detailed Diagnostics:** Write a comprehensive failure report to `report/implementation_log.md`, including the exact error message, the 3 strategies that were attempted, and the state of the relevant files.
+  3.  **Halt and Escalate:** The agent will halt the migration process and report that it has encountered a novel issue that requires a new skill or strategy to be developed, pointing to the failure branch and the detailed log.
 
 ### Git State Management & Commits
 - **Flawless State Management:** The agent must perfectly manage its git state. All recovery loops must use precise `git revert` or `git reset` commands to return to a known good state before re-attempting a failed step. Stashes should be used carefully and always cleaned up.
 - **Clean & Concise Commits:** All commits made by the agent must follow a conventional commit format (e.g., `feat:`, `fix:`, `chore:`). The message must be simple, concise, and accurately describe the change. No fluff.
-- **Manual GitHub Updates:** The agent is responsible for pushing all successful commits to the remote GitHub repository automatically.
+- **Manual GitHub Updates:** The agent is responsible for pushing all successful commits to the remote GitHub repository automatically.(never use tags n branches,perform all commits on the main branch and use commit messages for checkpoints)
 - **Mandatory Post-Migration Git:** After each successful version migration, the agent must immediately run `git status`, create the commit, and push it before starting the next version. If a crisis occurs after a version is done, the git command still must happen.
-- **Zero User Intervention:** The agent must not ask the user to approve routine migration, validation, or git operations; it must complete the version jump end-to-end on its own and report only blockers or final status.
-- **Post-Commit Recovery Check:** After every version jump is committed and pushed, the agent must verify the branch state and continue from that checkpoint instead of silently skipping ahead
+- **Post-Commit Recovery Check:** After every version jump is committed and pushed, the agent must verify the  state and continue from that checkpoint instead of silently skipping ahead.(never use tags n branches for checkpoints; only check commits for checkpoints)
 
-- **Spec requirement:** Implementation steps MUST ensure that for every component modified or created, a corresponding `<component>.component.spec.ts` exists; the unit-testing agent will discover and run all `*.spec.ts` as part of validation.
+### Active Automation Directive
+- When the command `implement the migration plan` is issued, the Implementation Agent MUST perform the entire v16 → v17 migration autonomously and end-to-end, including assessment and planning steps if they have not yet run.
+- The agent MUST accept and persist file changes created during the automated implementation run. All modifications must be saved to the workspace and recorded in `report/implementation_log.md`.
+- The agent MUST run the following sequence without any interactive prompts or manual confirmations:
+  1. `npm install` (perform clean-workspace steps if necessary)
+ 2. `ng build --configuration=production`
+ 3. `ng test -- --watch=false` (run targeted specs when full-suite is impractical)
+  4. If gates pass: `git status`, `git add -A`, `git commit -m "chore(migration): complete Angular v17"`, `git push origin HEAD`.
+- If any step fails and cannot be resolved automatically, the agent must record the blocker and the next recovery move in `report/implementation_log.md` and halt. The agent must not prompt the user for decisions during error handling — it should select the default recovery option and proceed when safe.
+- The Implementation Agent will update `report/implementation_log.md` with the final status, checkpoint commit hash, and a per-component summary of changes applied.
 
-### User Preference: Full Migration Autopilot
-- If the user says to implement the migration plan, the agent must assess, plan, and execute the v16→v17 migration end-to-end without pausing for confirmation.
-- The agent must accept changes and keep files in place.
-- The agent must stop only after migration to v17 is completed.
-- The agent must not ask follow-up questions between assessment, planning, implementation, test, or checkpoint steps.
+### Checkpoint & Branching Addendum (Commit-only)
 
-### Operational Enhancements: Orchestration & Diagnostics
+- Commit-only checkpoints: The implementation agent MUST NOT create or push git tags or use branches as migration checkpoints. Instead:
+  1. Create a single commit on `main` with a conventional message: `git add -A && git commit -m "chore(migration): complete Angular v17"`.
+  2. Push the commit: `git push origin HEAD`.
+  3. Record the checkpoint using `git_checkpoint_commit` (short hash) and `git_checkpoint_message` in `report/implementation_log.md`.
 
-- **Phase-Level Observability:** For each implementation phase, emit structured logs (JSON lines) containing step id, start/end timestamps, exit codes, and summary of changed files. Store these in `report/logs/<timestamp>-run.jsonl`.
-- **Automatic Diffing:** Before committing, generate `git diff --staged --name-only` and the full patch in `report/patches/<timestamp>-commit.diff`. Include this patch in `report/implementation_log.md` and the checkpoint artifact.
-- **Targeted Failure Recovery:** On failure, attempt the lowest-impact recovery first (reinstalling node_modules, small refactor patch, or targeted revert of the last commit). If automatic recovery fails, create a failure branch with diagnostics and proposed patch and stop.
-- **Push Fallback (no tags):** If remote push fails repeatedly, create `migration-backup/<timestamp>` branch and open a PR with the patch and diagnostics. Do NOT create or push tags; tags are disallowed. This ensures the changes are preserved and visible even if remote push fails due to permissions or network issues.
+- Investigation branches: Creating a local branch for diagnostics (e.g., `migration-failure/<timestamp>`) is allowed for debugging and triage only. Such branches:
+  - Must NOT be treated as migration checkpoints.
+  - Should be used to collect logs and diffs, and may be pushed only if required for remote debugging, but never used as the authoritative migration checkpoint.
 
-### Security & Node Pragmatics
+- Tag avoidance: Do not run `git push origin <tag>` or create annotated tags as part of the migration checkpoint. Instead, push the authoritative commit (e.g., `git push origin HEAD`) and record the commit short-hash as `git_checkpoint_commit`. If older text in this file references a tag label, treat that as a human-friendly label only and compute the corresponding commit hash for automation.
 
-- **Pre-Flight Security Check:** Run `npm audit --json` before major dependency changes. If critical vulnerabilities are present, include them in the plan as a P0 task and attempt an `npm audit fix` non-force option during the implementation phase.
-- **Node Compatibility Heuristics:** If the local Node runtime is outside the `engines.node` range, the agent should attempt non-invasive compatibility modes (`--legacy-peer-deps`, skip optional postinstall scripts) and record the decision. If these fail, include explicit, copyable remediation steps rather than forcing an environment change.
-- **Non-Blocking Policy:** For Medium/Low vulnerabilities, the agent will document and continue but add a targeted follow-up item in the migration plan to address them post-migration.
+### File-level Diff and Diagnostics (Orchestration polish)
 
-### Reporting & Attachments
+- After each automated change, include a file-level diff entry in `report/implementation_log.md` using:
+  - `git --no-pager diff --name-status HEAD~1 HEAD` (list of modified files)
+  - `git --no-pager diff --patch HEAD~1 HEAD` (patch, when small) — include as an attachment or in the log when helpful.
+- On failures, capture:
+  - Full build output and failing test names.
+  - Stack traces and the list of modified files nearby the failure.
+  - Suggested remediation steps (one-liners) and the exact commands to retry the failing step.
 
-- **Diagnostic Bundles:** On any halted or failed step, write a diagnostic bundle to `report/diagnostics/<timestamp>-<slug>.zip` containing: logs, `package.json`, `package-lock.json` (or `pnpm-lock.yaml`), `git status`, `git diff --staged`, and the proposed patch. This bundle is machine-readable and suitable for upload to an issue tracker.
-- **Human-Friendly Summary:** Alongside the machine artifacts, append a short remediation checklist in `report/implementation_log.md` that lists: root cause hypothesis, recommended next moves, and an estimated time-to-fix.
-
-### must include OUTPUT
-- **Report:** `report/implementation_log.md`
-- **Total number of components present:** (agent-discovered integer)
-- **Total number of components migrated in implementation:** (agent-updated integer)
-- **Total number of components pending implementation:** (agent-computed integer)
-- **Migration completion percentage:** (computed as migrated/total * 100)
-- **Spec files present:** (number of `*.spec.ts` found)
-- **Spec files missing:** (number of components without `*.spec.ts`)
-- **Timestamp:** (ISO 8601 UTC when implementation snapshot was taken)
-- **Core details:** list of applied patches, rollbacks performed, and failure reasons for any halted tasks.
+### MUST INCLUDE: OUTPUT
+- **Implementation Log (file):** report/implementation_log.md
+- **Total Components Present:** (ingested from assessment)
+- **Total Components Migrated:** (updated as implementation finishes component-level fixes)
+- **Files Modified:** (list generated by the implementation run)
+- **Build Status:** (last build result and key warnings/errors)
+- **Git Checkpoint:** checkpoint commit hash when the final jump is successful

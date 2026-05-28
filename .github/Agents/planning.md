@@ -27,10 +27,6 @@ Note: In this workspace the "version rule" applies to the v16→v17 checkpoint. 
   - Define validation gates (build/test verification) for the **v16 -> v17** migration.
 2. Validate that the plan follows the strict incremental sequence.
 
-### Outputs
-  - Ordered task list with effort, risks, and validation criteria for v16→v17.
-  - Manual step cross-references.
-
 ### Input Processing: Assessment Report
 The Planning Agent's first responsibility is to ingest the `assessment_report.md`. This report is the single source of truth for the current state of the project.
 
@@ -111,21 +107,19 @@ A detailed breakdown of risks identified during assessment:
 A robust rollback strategy is critical for maintaining stability during a complex migration. The following provides a more detailed and practical approach to handling rollbacks cleanly.
 
 - **Granular Commits:** Each migration step (e.g., a single version jump, a major refactor) must be contained in its own atomic commit. This allows for precise rollbacks without losing unrelated work.
-- **Branching Model:**
-  - **`migration` branch:** All migration work should be done on a dedicated feature branch.
-  - **Checkpoint representation:** After each successful version jump, represent the checkpoint via the commit on `main` (for example, a commit message like `chore: complete Angular v18 migration`). Do NOT create or push git tags; tags are disallowed for checkpoints.
+- **Branching Model:** Instead of using tags for checkpoints, the agent should commit to the main branch n not extra branches with clear commit messages that indicate the checkpoint (e.g., `chore(migration): complete Angular v17`). This way, the commit history itself serves as the checkpoint system.
 - **Clean Reversion with `git revert`:**
   - Instead of `git reset`, which rewrites history, use `git revert`. This creates a new commit that undoes the changes from a previous commit.
   - **Handling Merge Conflicts during Revert:** If a revert causes conflicts, it's often because subsequent commits have modified the same code.
-    - **Strategy:** Do not panic. Carefully examine the conflicts. It's often safer to abort the revert (`git revert --abort`), create a new branch from the last stable checkpoint commit or a backup branch, and re-apply the successful changes manually, leaving out the problematic commit.
+    - **Strategy:** Do not panic. Carefully examine the conflicts. It's often safer to abort the revert (`git revert --abort`), create a new branch from the last stable checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints), and re-apply the successful changes manually, leaving out the problematic commit and finally merging back to main. This way, you maintain a clean history and avoid the complexities of reverting a revert.
 - **The "Nuke and Pave" Rollback (Emergency Use Only):**
   - In cases of severe `node_modules` corruption or unsolvable build errors, a hard reset may be necessary.
     - 1. **Stash any valuable, uncommitted changes:** `git stash`
-    - 2. **Hard reset to the last known good checkpoint commit:** `git reset --hard <checkpoint-commit>`
+    - 2. **Hard reset to the last known good commit:** `git reset --hard <git_checkpoint_commit>`
     - 3. **Clean the workspace:** `rimraf node_modules package-lock.json dist`
     - 4. **Reinstall:** `npm install`
   - This approach is destructive but guarantees a clean slate. It should be used as a last resort when `git revert` is too complex.
-  - **Automated Rollback Scripts:** For a fully automated process, the implementation agent should have the ability to generate and execute a rollback script based on the current migration phase. The script would use the checkpoint commit or a dedicated backup branch to revert the codebase to the last stable state.
+- **Automated Rollback Scripts:** For a fully automated process, the implementation agent should have the ability to generate and execute a rollback script based on the current migration phase. The script would use the `checkpoint` commits (never use tags n branches for checkpoints; only check commits for checkpoints) to revert the codebase to the last stable state.
 - **100% Test Suite Pass Rate:** All unit and end-to-end tests must pass. Test coverage should not decrease.
 - **Zero Regression:** All primary features and critical user flows of the application must be fully functional and visually identical to the pre-migration state.
 - **100% Component, Module, and Import Migration:** All components, modules, and imports must be fully migrated to the target version's standards. This includes:
@@ -149,11 +143,9 @@ A robust rollback strategy is critical for maintaining stability during a comple
 - **Final Report:** The `implementation_log.md` is generated and shows a successful migration.
 
 
-### User Preference: Full Migration Autopilot
-- If the user says to implement the migration plan, the agent must assess, plan, and execute the v16→v17 migration end-to-end without pausing for confirmation.
-- The agent must accept changes and keep files in place.
-- The agent must stop only after migration to v17 is completed.
-- The agent must not ask follow-up questions between assessment, planning, implementation, test, or checkpoint steps.
+### Active Automation Directive
+- When the user issues `implement the migration plan`, the planning agent MUST generate or validate the `plan/migration_v16_to_v17.md` per-component checklist and ensure the plan enforces end-to-end autonomous execution. The planning agent must mark required validation gates, git checkpoint steps(never use tags n branches for checkpoints; only check commits for checkpoints), and rollback procedures. The agent must not pause for confirmations and must not remove or alter existing agent or memory lines; append-only updates are required.
+
 
 ### Final Report and Execution Plan
 The final output is the `migration_plan.md`, which includes:
@@ -168,13 +160,16 @@ The final output is the `migration_plan.md`, which includes:
 - **Trigger:** A failure is defined as an unresolvable build error or a critical test failure that cannot be fixed within a predefined time limit.
 - **Looping for Success:** If a rollback occurs, the process does not terminate. The agent will re-evaluate the failed step, adjust the plan, and re-attempt the migration. This loop continues until the migration for that version is successfully achieved or the escalation protocol is triggered.
 
-### Appendix: Orchestration Polish
+### Checkpoint & Rollback Addendum (Commit-first policy)
 
-- **Phase Timeouts & Backoff:** Each automated phase must include a configurable timeout and an exponential backoff retry policy for transient operations (network, npm registry, git push). Log retry counts and final outcome.
-- **Concurrency Limits:** Limit concurrent file modifications and package updates to avoid race conditions on CI or Windows file locks. Default: single-threaded critical steps, parallelize only low-risk verification tasks.
-- **Checkpoint Artifacts (machine-readable):** After every successful version jump, write a JSON checkpoint artifact to `report/checkpoints/<timestamp>-checkpoint.json` containing: git ref, applied patches list, npm/Node versions, and validation results. This enables programmatic review and rollback automation.
-- **Push Failure Recovery (no tags):** If `git push` fails, the agent must attempt an exponential-backoff retry (3 attempts), then create a backup branch `migration-backup/<timestamp>` and create a pull request listing the failure and the next recovery actions. Include the failing git command log in `report/implementation_log.md`. Do NOT create or rely on git tags.
-- **Stall & Next-Move Protocol:** When stalled beyond a threshold (configurable; default 10 minutes), the agent must (1) capture the last 200 lines of logs, (2) snapshot `git status` and `git diff --staged`, (3) determine the smallest safe recovery move (e.g., clean install, revert single commit), and (4) attempt that move automatically before escalating.
+- Policy: The authoritative migration checkpoint must be a commit on `main` (commit message + commit hash). Do NOT create or rely on git tags as the canonical checkpoint.
+- Automated rollback guidance:
+  1. Locate the checkpoint commit by commit message: `git rev-list -n 1 --grep="chore(migration): complete Angular v17" --all`
+  2. Reset to the checkpoint commit: `git reset --hard <commit-hash>`
+  3. Clean and reinstall: `npx rimraf node_modules package-lock.json && npm install`
+
+- Notes: If any existing text references a tag-based reset (e.g., `git reset --hard <tag>`) or similar tag-based operations, replace the tag usage with a commit-hash based reset. Compute the checkpoint commit (e.g., via `git rev-list -n 1 --grep="chore(migration): complete Angular v17" --all`) and run `git reset --hard <git_checkpoint_commit>`. Store `git_checkpoint_commit` (short hash) in the plan metadata for deterministic automation.
+
 
 ### Diagnostics & File-Diff Policy
 
@@ -183,26 +178,17 @@ The final output is the `migration_plan.md`, which includes:
 - **Known-Issue Mapping:** Maintain a lightweight mapping of common error signatures to remediation recipes (e.g., `NG6008` → standalone component import fix). When a signature is matched, include the suggested fix and a link to the relevant example from the repository (file and snippet) in the diagnostic bundle.
 - **Automated Patch Proposal:** Where safe, the agent should generate a candidate patch file (not auto-applied) and attach it to the diagnostic bundle for human review. The patch must be stored in `report/patches/proposed/<timestamp>-proposal.diff` and be included with the failure report.
 
-### Vulnerability Handling & Node Compatibility Guidance
+### Autonomous Invocation & Strict Enforcement (Append Only)
+- When `implement the migration plan` is issued, the Planning Agent MUST execute automatically to produce or refresh `plan/migration_v16_to_v17.md` and any required per-component checklists. No user confirmation is allowed.
+- The Planning Agent must record the progress update: "package files updated and timer-based components fixed to trigger change detection" in its planning memory and include the two next-step options (A and B) in the plan metadata.
+- The plan must include a mandatory checkpoint sequence that the Implementation Agent will follow: `npm install`, `ng build`, `ng test -- --watch=false`, `git status`, `git add -A`, `git commit -m "chore(migration): complete Angular v17"`, `git push`.
 
-- **Audit & Classification:** Before and after dependency updates, run `npm audit --json` and classify vulnerabilities by severity. Include the audit JSON and a human-readable summary in `report/security/<timestamp>-audit.md`.
-- **Remediation Policy:** Attempt `npm audit fix` (non-force) first. For remaining high/critical vulnerabilities, attempt safe upgrades of the affected packages. Use `--force` only as a last-resort and log the rationale clearly in the report.
-- **Sensible Defaults (avoid rigidity):** Do not block migration on every non-critical vulnerability. Classify vulnerabilities into: Critical (blocker), High (blocker unless safe patch available), Medium/Low (document and defer). Allow config override for stricter policies.
-- **Node Version Handling:** Inspect `package.json` `engines.node` (if present) and compare to the runtime Node version. If incompatible, the agent should:
-  - Warn and record the mismatch in the checkpoint artifact.
-  - Attempt non-invasive workarounds (`npm ci --legacy-peer-deps`, `npm ci --no-audit`) before suggesting environment changes.
-  - If version mismatch prevents build/test, provide clear remediation steps (use `nvm`/`nvm-windows`, upgrade Node to target range) and include a short, copyable command set in the failure report. Do NOT force an automatic Node upgrade that may break other local tooling.
-- **Audit Trail:** All security and Node compatibility decisions must be captured in the checkpoint artifact and the `report/implementation_log.md` to support post-mortem review.
+### Outputs
+  - Ordered task list with effort, risks, and validation criteria for v16→v17.
+  - Manual step cross-references.
 
-### must include OUTPUT
-- **Report:** `plan/migration_plan.md`
-- **Total number of components present:** (agent-discovered integer)
-- **Total number of components targeted by plan:** (agent-computed integer)
-- **Total number of components with assigned tasks:** (agent-updated integer)
-- **Migration completion percentage:** (computed as completed tasks/total * 100)
-- **Spec files present:** (number of `*.spec.ts` found)
-- **Spec files missing:** (number of components without `*.spec.ts`)
-- **Timestamp:** (ISO 8601 UTC when plan was generated)
-- **Core details:** task breakdown by priority, estimated effort, and validation gates.
-
-- **Spec requirement:** The planning agent will require that each component included in the plan has a corresponding `<component>.component.spec.ts` so tests can be executed during implementation and validation.
+## OUTPUT
+- **Report**: `plan/migration_v16_to_v17.md` (the active plan) and `report/planning_report.md` (summary of planning decisions and risk matrix).
+- **Total components present**:(populate from asssessment report)
+- **Planned components to migrate**: (populate from assessment report)
+- **Completion percentage**: (tracked by Documentation Agent using agent outputs)

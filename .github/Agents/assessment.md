@@ -59,14 +59,6 @@ Clarification: In this workspace the "Strict Incremental Analysis" should be rea
      - **Error Pattern Recognition:** Identify common errors from past migrations, such as `NG6008` for standalone components in `declarations`, and `NG8002`/`NG8004` for missing `CommonModule`/`FormsModule`.
 2. Output the findings and checklists into the Assessment Report.
 
-### Outputs
-- **Migration Assessment Report (Markdown):** 
-  - v16→v17 roadmap and per-phase risks.
-  - **Specific, actionable warnings for bootstrapping and `node_modules` health.**
-  - Minimal summary of CSS architectural risks.
-  - A section on common, repeatable errors from past migrations.
-- **must include** - Generated in `report/assessment_report.md`.
-
 ### Comprehensive Project Inventory
 The assessment agent is responsible for creating a complete inventory of the project's structure and dependencies. This inventory is a critical input for the planning agent.
 
@@ -80,29 +72,41 @@ The assessment agent is responsible for creating a complete inventory of the pro
 - **Report Generation:** The collected data will be structured and included in the `assessment_report.md` under a new "Project Inventory" section. This provides a single source of truth for the planning agent.
 
 ---
+### Checkpoint Policy Addendum (Commit-only)
 
+- Purpose: The authoritative migration checkpoint is the commit on `main` (commit message + commit hash). Do NOT create git tags or treat a tag as the canonical checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints)
+- When this file or any report references `git_checkpoint_tag` (for human readability), the agent must:
+  1. Create a commit with a clear, conventional message (example: `chore(migration): complete Angular v17`).
+  2. Push the commit to the remote: `git push origin HEAD`.
+  3. Record the authoritative checkpoint as `git_checkpoint_commit` (short hash) and `git_checkpoint_message` in the assessment report and implementation logs.
+  4. Treat any existing human-friendly checkpoint label as informational only; compute and use the corresponding commit hash (store as `git_checkpoint_commit`) for automation. Do not create or push git tags for migration checkpoints.(never use tags n branches for checkpoints; only check commits for checkpoints)
 
-### User Preference: Full Migration Autopilot
-- If the user says to implement the migration plan, the agent must assess, plan, and execute the v16→v17 migration end-to-end without pausing for confirmation.
-- The agent must accept changes and keep files in place.
-- The agent must stop only after migration to v17 is completed.
-- The agent must not ask follow-up questions between assessment, planning, implementation, test, or checkpoint steps.
+Example record to include in `report/assessment_report.md`:
 
-### Preflight: Security & Node Compatibility Checks
+```
+git_checkpoint_message: "chore(migration): complete Angular v17"
+git_checkpoint_commit: "$(git rev-parse --short HEAD)"
+```
 
-- **Security Audit:** As part of pre-flight, run `npm audit --json` and summarize any Critical/High vulnerabilities in the `assessment_report.md`. Flag Critical vulnerabilities as blockers for the next-phase plan unless a safe remediation path is identified.
-- **Node Runtime Check:** Inspect `package.json` for `engines.node`. Compare with the local runtime and record mismatches in the assessment report. If the runtime is outside the supported range, include non-invasive fallback recommendations (e.g., `npm ci --legacy-peer-deps`) and a clear, copyable remediation paragraph (nvm/nvm-windows guidance) but do not auto-upgrade the environment.
+### Active Automation Directive
+- When the user issues `implement the migration plan`, the assessment agent MUST run the assessment for the v16→v17 migration end-to-end without requiring any user interaction. The assessment must produce `report/assessment_report.md` including a component inventory and explicit zone/change-detection findings (with file and line references). The agent must not pause for confirmations and must not remove or alter existing agent or memory lines; append-only updates are required.
 
-### must include OUTPUT
-- **Report:** `report/assessment_report.md`
-- **Total number of components present:** (agent-discovered integer)
-- **Total number of components migrated:** (agent-updated integer)
-- **Total number of components pending migration:** (agent-computed integer)
-- **Migration completion percentage:** (computed as migrated/total * 100)
-- **Spec files present:** (number of `*.spec.ts` found)
-- **Spec files missing:** (number of components with no `*.spec.ts`)
-- **Timestamp:** (ISO 8601 UTC when report was generated)
-- **Additional core details:** list of modules impacted, major blockers, and top 5 risk items.
+### Richer Diagnostics & Actionable Reporting (Append Only)
+- **File-Level Diagnostics:** Every identified issue in the assessment report must include exact file paths, line numbers, and a one-liner remediation command.
+- **Atomic Validation:** The assessment must include a pre-flight gate verifying all required sections (dependency table, inventory, zone risks) exist before declaring the assessment complete.
 
-- **Spec requirement:** Every component discovered MUST have a corresponding `<component>.component.spec.ts` file. The unit-testing agent will discover and run all `*.spec.ts` files and include results in `report/test_report.md`.
-- **Automation Requirement:** The assessment output should explicitly support a fully autonomous migration run that ends in the required git status, commit, and push checkpoint.
+### Outputs
+- **Migration Assessment Report (Markdown):** 
+  - Focused 16 → 17 migration checklist and risk summary.
+  - **Specific, actionable warnings for bootstrapping and `node_modules` health.**
+  - Minimal summary of CSS and builder compatibility risks.
+  - Targeted Angular 17 readiness pre-flight checklist.
+  - A section on common, repeatable errors from past migrations.
+- **must include** - Generated in `report/assessment_report.md`.
+
+### must include **OUTPUT
+- **Report:** report/assessment_report.md
+- **Total number of components present:** (agent to compute from `src/app/components`)
+- **Total number of components migrated:** (agent to populate)
+- **Migration completion %:** (agent to compute)
+- **Core details:** Blockers, high-risk modules, checklist completion status

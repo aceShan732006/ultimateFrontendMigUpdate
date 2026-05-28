@@ -64,13 +64,8 @@ This agent is now authoritative for Angular **v16 -> v17 only** in this workspac
   - Produce a machine-readable summary in `report/test_report.md` including counts, pass/fail details, and timestamps.
 
 
-### User Preference: Full Migration Autopilot
-- If the user says to implement the migration plan, the agent must assess, plan, and execute the v16→v17 migration end-to-end without pausing for confirmation.
-- The agent must accept changes and keep files in place.
-- The agent must stop only after migration to v17 is completed.
-- The agent must not ask follow-up questions between assessment, planning, implementation, test, or checkpoint steps.
-
----
+### Active Automation Directive
+- When the user issues `implement the migration plan`, the unit-testing agent MUST run targeted and then full test suites for the v16→v17 migration automatically. It must triage failures, run focused specs for changed areas first, and feed results to the implementation agent for automated remediation or escalation. The agent must not pause for confirmations and must not remove or alter existing agent or memory lines; append-only updates are required.
 
 ### Diagnostics & Remediation Attachments
 
@@ -78,19 +73,40 @@ This agent is now authoritative for Angular **v16 -> v17 only** in this workspac
 - **Patch Suggestions for Tests:** If a failing test can be resolved by a small, low-risk change (for example, updating an assertion or test timeout), the agent may produce a proposed patch and include it as `report/patches/<timestamp>-test-fix.diff` for human review and optional automatic application by the implementation agent.
 - **Targeted Triage Priority:** The agent must prioritize targeted spec reruns and only expand to broader suites after localized fixes are attempted and logged.
 
+---
+
+### Pre-Completion Verification: Run and verify all `*.spec.ts` files
+
+- Objective: Ensure every tracked `*.spec.ts` file is executed and passes before marking the unit-testing step complete.
+
+- Agent Steps (automation):
+  1. Count tracked spec files (cross-platform):
+     - Unix (bash): `total_specs=$(git ls-files '*.spec.ts' | wc -l)`
+     - PowerShell: `$total = (Get-ChildItem -Recurse -Filter '*.spec.ts' -File).Count`
+  2. Run focused specs for changed areas first, then run full suite:
+     - `ng test --watch=false` and capture output to `report/test_report.md`
+  3. Parse the test output to determine executed/passed spec counts and compare with `total_specs`.
+     - If executed spec count < `total_specs` OR any tests fail, mark the step as failed and run targeted diagnostics for failing specs (collect stack traces, failing spec file paths, and output snippets).
+  4. Only when the full-suite run passes and the executed spec count matches `total_specs`, create the migration checkpoint commit ((never use tags n branches for checkpoints; only check commits for checkpoints)) and update the completion status.
+
+- Reporting requirement: Always write `report/test_report.md` with:
+  - `total_spec_files_counted`, `executed_spec_files`, `passed`, `failed`, and a list of failing spec files with suggested next steps.
+
+- Implementation notes:
+  - Prefer `git ls-files` for tracked specs; fall back to a filesystem enumeration on platforms without `git` available.
+  - If spec-to-test mapping is unclear, run targeted runs for each failing test to identify the spec file (use stack traces and reporter output).
+
+### Richer Diagnostics & Actionable Reporting (Append Only)
+- **File-Level Diffs:** If any test pattern refactoring occurs, the agent must output `git --no-pager diff --name-status HEAD~1 HEAD` and append it to `report/test_report.md`.
+- **Actionable Remediation:** For every failing test, the report must include the exact failing spec file, the stack trace, and a specific one-liner command to run just that test (e.g., `ng test --include=src/app/my.component.spec.ts`) along with a suggested fix pattern.
+
 ### Outputs
-- **Test Status Log:** Phase-by-phase pass/fail result audit.
+- **Test Status Log:** Final migration pass/fail result audit.
 - **must include** - Generated in `report/test_report.md`.
 
-### must include OUTPUT
-- **Report:** `report/test_report.md`
-- **Total number of components present:** (agent-discovered integer)
-- **Total number of components with spec.ts:** (number of `*.spec.ts` found)
-- **Total number of spec failures:** (from the most recent run)
-- **Total number of spec passes:** (from the most recent run)
-- **Migration test completion percentage:** (computed as passingSpecs/totalSpecs * 100)
-- **Timestamp:** (ISO 8601 UTC when tests were executed)
-- **Core details:** list of failing specs, stack traces, and targeted recovery suggestions.
-
-- **Spec requirement:** The unit-testing agent will ensure every component has a `<component>.component.spec.ts`; it will discover, run, and report on all `*.spec.ts` files during validation and will include a count of missing spec files in the final test report.
-- **Autonomous Completion:** Once tests pass, the unit-testing flow should hand control back to the implementation agent so it can finish the checkpoint and git push without waiting for user intervention.
+### MUST INCLUDE: OUTPUT
+- **Test Report (file):** report/test_report.md
+- **Total Specs Discovered:** (auto-populated)
+- **Total Specs Passing / Failing:** (summary)
+- **Coverage Impact:** (summary of coverage delta pre/post migration)
+- **Components with Test Failures:** (list to feed back to implementation agent)
