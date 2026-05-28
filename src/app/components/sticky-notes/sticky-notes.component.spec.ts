@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { StickyNotesComponent } from './sticky-notes.component';
 
 describe('StickyNotesComponent', () => {
@@ -7,7 +9,9 @@ describe('StickyNotesComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [StickyNotesComponent]
+      declarations: [StickyNotesComponent],
+      imports: [FormsModule],
+      schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
     fixture = TestBed.createComponent(StickyNotesComponent);
     component = fixture.componentInstance;
