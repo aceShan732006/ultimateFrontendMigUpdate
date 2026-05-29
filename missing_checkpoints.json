@@ -1,0 +1,232 @@
+{
+  "Agents/assessment.md": [
+    [
+      11,
+      "This agent now focuses on assessing readiness for the single, atomic upgrade from Angular **v17 \u2192 v18**. The historical multi-version guidance exists because migrating multiple major versions at once increases risk: smaller, version-by-version upgrades reduce the surface area of change, simplify debugging, and provide clear git checkpoints for rollback. Apply the checks below primarily to the v17\u2192v18 jump unless a new, explicit plan asks for additional version steps."
+    ],
+    [
+      20,
+      "Note (active policy): For this workspace the active enforcement is to validate the single v17 \u2192 v18 jump and create a git checkpoint"
+    ],
+    [
+      74,
+      "### Checkpoint Policy Addendum (Commit-only)"
+    ],
+    [
+      76,
+      "- Purpose: The authoritative migration checkpoint is the commit on `main` (commit message + commit hash). Do NOT create git tags or treat a tag as the canonical checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints)"
+    ],
+    [
+      77,
+      "- When this file or any report references `git_checkpoint_tag` (for human readability), the agent must:"
+    ],
+    [
+      80,
+      "3. Record the authoritative checkpoint as `git_checkpoint_commit` (short hash) and `git_checkpoint_message` in the assessment report and implementation logs."
+    ],
+    [
+      81,
+      "4. Treat any existing human-friendly checkpoint label as informational only; compute and use the corresponding commit hash (store as `git_checkpoint_commit`) for automation. Do not create or push git tags for migration checkpoints.(never use tags n branches for checkpoints; only check commits for checkpoints)"
+    ],
+    [
+      86,
+      "git_checkpoint_message: \"chore(migration): complete Angular v18\""
+    ],
+    [
+      87,
+      "git_checkpoint_commit: \"$(git rev-parse --short HEAD)\""
+    ]
+  ],
+  "Agents/documentation.md": [
+    [
+      29,
+      "- When the user issues `implement the migration plan`, the documentation agent MUST record the v17\u2192v18 run end-to-end and produce `docs/documentation.md` without requiring any human confirmations. The documentation must include the selected default for any optional migration prompts, the exact git checkpoint performed (never use tags n branches for checkpoints; only check commits for checkpoints), and a clear summary of any warnings or deferred items. The agent must not remove or alter existing agent or memory lines; append-only updates are required."
+    ],
+    [
+      31,
+      "### Checkpoint & Branch Usage Addendum"
+    ],
+    [
+      33,
+      "- Checkpoint policy: Documentation must record commit-only checkpoints. Do NOT create or rely on tags or branches as authoritative migration checkpoints. Instead, the documentation agent must record:"
+    ],
+    [
+      34,
+      "- `git_checkpoint_message`: the commit message used for the checkpoint"
+    ],
+    [
+      35,
+      "- `git_checkpoint_commit`: the short commit hash"
+    ],
+    [
+      37,
+      "- Branch usage for debugging: `migration-failure/` branches may be created for investigation and triage, but they must not be considered migration checkpoints. If such branches are referenced, the documentation should clearly label them as investigative artifacts and not checkpointed states."
+    ]
+  ],
+  "Agents/implementation.md": [
+    [
+      37,
+      "- **Autonomous Finish:** After validation passes, immediately run `git status`, create the commit, and push it to `origin main`. Do NOT create or push tags; represent the v18-stable checkpoint"
+    ],
+    [
+      48,
+      "- **Per-Version Plan Sequencing:** The implementation agent MUST read and execute migration plans ONE VERSION AT A TIME. Do NOT attempt all 5 versions in a single execution loop. Workflow: (1) Read `plan/migration_v17_to_v18.md`, (2) Execute all tasks fully, (3) Run `git status`, commit, and push to `origin main` to create a checkpoint (do NOT create or push tags), (4) Then stop unless a new plan is explicitly created. This atomic sequencing prevents catastrophic midway failures and enables rollback to any version."
+    ],
+    [
+      60,
+      "- **Post-Commit Recovery Check:**After every version jump is committed and pushed, the agent must verify the  state and continue from that checkpoint instead of silently skipping ahead.(never use tags n branches for checkpoints; only check commits for checkpoints)"
+    ],
+    [
+      74,
+      "### Checkpoint & Branching Addendum (Commit-only)"
+    ],
+    [
+      76,
+      "- Commit-only checkpoints: The implementation agent MUST NOT create or push git tags or use branches as migration checkpoints(never use tags n branches for checkpoints; only check commits for checkpoints). Instead:"
+    ],
+    [
+      79,
+      "3. Record the checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) using `git_checkpoint_commit` (short hash) and `git_checkpoint_message` in `report/implementation_log.md`."
+    ],
+    [
+      85,
+      "- Tag avoidance: Do not run `git push origin <tag>` or create annotated tags as part of the migration checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints). Instead, push the authoritative commit (e.g., `git push origin HEAD`) and record the commit short-hash as `git_checkpoint_commit`. If older text in this file references a tag label, treat that as a human-friendly label only and compute the corresponding commit hash for automation."
+    ],
+    [
+      109,
+      "- **Git Checkpoint:** checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) commit hash when the final jump is successful"
+    ]
+  ],
+  "Agents/migCombined16.md": [
+    [
+      41,
+      "- **Autonomous Checkpointing:** A successful checkpoint is not complete until the commit has been created and pushed automatically; the agent must not pause for user confirmation."
+    ],
+    [
+      62,
+      "- The Master Migration Agent (combined agent) MUST, on `implement the migration plan`, orchestrate the assessment, planning, implementation, testing, and documentation agents to perform the v17\u2192v18 migration fully autonomously. It must ensure the system accepts code changes, commits and pushes checkpoints (never use tags n branches for checkpoints; only check commits for checkpoints) and records the authoritative checkpoint as `git_checkpoint_commit` (short hash) together with `git_checkpoint_message`, and reports final status without pausing for user interaction. Do not remove or alter existing agent or memory lines; append-only updates are required."
+    ],
+    [
+      64,
+      "### Checkpoint Policy Addendum (Master Agent)"
+    ],
+    [
+      68,
+      "3. Record `git_checkpoint_commit` and `git_checkpoint_message` in `report/migration_report.md`.(never use tags n branches for checkpoints; only check commits for checkpoints)"
+    ],
+    [
+      70,
+      "- Any reference to a human-friendly checkpoint label in this file is informational only. The Master Agent must compute and record the corresponding commit hash as `git_checkpoint_commit` for automated operations and must not rely on tags as checkpoints(never use tags n branches for checkpoints; only check commits for checkpoints)."
+    ],
+    [
+      71,
+      "- Any reference to a human-friendly checkpoint label in this file is informational only. The Master Agent must compute and record the corresponding commit hash as `git_checkpoint_commit` for automated operations and must not rely on tags as checkpoints(never use tags n branches for checkpoints; only check commits for checkpoints)."
+    ],
+    [
+      74,
+      "- **Autonomy mandate (must do):** The master migration agent must orchestrate a fully autonomous v17\u2192v18 migration run when requested by the user. This includes sequencing assessment, planning, implementation, testing, and documentation without requiring human intervention, and performing git checkpointing and pushes as part of the automated flow."
+    ],
+    [
+      75,
+      "- **Accept changes:** The master agent must accept changes produced by sub-agents and ensure they are committed and pushed as part of the checkpointing process."
+    ],
+    [
+      76,
+      "- **Stop condition:** The master agent stops only after the migration to v18 is complete and the checkpoint commit is pushed to `origin main` (do NOT push tags), or after recording a documented unrecoverable blocker."
+    ]
+  ],
+  "Agents/planning.md": [
+    [
+      19,
+      "Note: In this workspace the \"version rule\" applies to the v17\u2192v18 checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints). Further version checkpoints are historical recommendations."
+    ],
+    [
+      25,
+      "- The planner must not wait for user confirmation to begin, continue, or finish the v17\u2192v18 plan; the autonomous run should end in a git checkpoint."
+    ],
+    [
+      45,
+      "- Each plan includes: Phase breakdown, validation gates, rollback triggers, git checkpoint names(never use tags n branches for checkpoints; only check commits for checkpoints), success criteria, specific file changes for THAT version only."
+    ],
+    [
+      64,
+      "Note: In this workspace the \"version rule\" applies to the v17\u2192v18 checkpoint. Further version checkpoints are historical recommendations."
+    ],
+    [
+      69,
+      "- The planner must not wait for user confirmation to begin, continue, or finish the v17\u2192v18 plan; the autonomous run should end in a git checkpoint."
+    ],
+    [
+      121,
+      "- **Branching Model:** Instead of using tags for checkpoints(never use tags n branches for checkpoints; only check commits for checkpoints), the agent should commit to the main branch n not extra branches with clear commit messages that indicate the checkpoint. This way, the commit history itself serves as the checkpoint system."
+    ],
+    [
+      129,
+      "- 2. **Hard reset to the last known good commit:** `git reset --hard <git_checkpoint_commit>`"
+    ],
+    [
+      133,
+      "- **Automated Rollback Scripts:** For a fully automated process, the implementation agent should have the ability to generate and execute a rollback script based on the current migration phase. The script would use the `checkpoint` commits (never use tags n branches for checkpoints; only check commits for checkpoints) to revert the codebase to the last stable state."
+    ],
+    [
+      158,
+      "- When the user issues `implement the migration plan`, the planning agent MUST generate or validate the `plan/migration_v17_to_v18.md` per-component checklist and ensure the plan enforces end-to-end autonomous execution. The planning agent must mark required validation gates, git checkpoint steps(never use tags n branches for checkpoints; only check commits for checkpoints), and rollback procedures. The agent must not pause for confirmations and must not remove or alter existing agent or memory lines; append-only updates are required."
+    ],
+    [
+      173,
+      "### Checkpoint & Rollback Addendum (Commit-first policy)"
+    ],
+    [
+      175,
+      "- Policy: The authoritative migration checkpoint must be a commit on `main` (commit message + commit hash). Do NOT create or rely on git tags as the canonical checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints)."
+    ],
+    [
+      181,
+      "- Notes: If any existing text references a tag-based reset (e.g., `git reset --hard <tag>`) or similar tag-based operations, replace the tag usage with a commit-hash based reset. Compute the checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) commit (e.g., via `git rev-list -n 1 --grep=\"chore(migration): complete Angular v18\" --all`) and run `git reset --hard <git_checkpoint_commit>`. Store `git_checkpoint_commit` (short hash) in the plan metadata for deterministic automation."
+    ]
+  ],
+  "Agents/unittesting.md": [
+    [
+      36,
+      "- **Record & Hand-off:** Always append test results to `report/test_report.md` and hand control back to the implementation agent for checkpointing without requiring user confirmation."
+    ],
+    [
+      40,
+      "- **Autonomous Completion:** Once tests pass, the unit-testing flow should hand control back to the implementation agent so it can finish the checkpoint and git push without waiting for user intervention."
+    ],
+    [
+      65,
+      "4. Only when the full-suite run passes and the executed spec count matches `total_specs`, create the migration checkpoint commit ((never use tags n branches for checkpoints; only check commits for checkpoints)) and update the completion status."
+    ]
+  ],
+  "Skills/assessment.skill.md": [
+    [
+      7,
+      "- The agent must not ask follow-up questions between assessment, planning, implementation, test, or checkpoint steps."
+    ]
+  ],
+  "Skills/documentation.skill.md": [
+    [
+      7,
+      "- The agent must not ask follow-up questions between assessment, planning, implementation, test, or checkpoint steps."
+    ]
+  ],
+  "Skills/implementation.skill.md": [
+    [
+      7,
+      "- The agent must not ask follow-up questions between assessment, planning, implementation, test, or checkpoint steps."
+    ]
+  ],
+  "Skills/planning.skill.md": [
+    [
+      7,
+      "- The agent must not ask follow-up questions between assessment, planning, implementation, test, or checkpoint steps."
+    ]
+  ],
+  "Skills/unittesting.skill.md": [
+    [
+      7,
+      "- The agent must not ask follow-up questions between assessment, planning, implementation, test, or checkpoint steps."
+    ]
+  ]
+}

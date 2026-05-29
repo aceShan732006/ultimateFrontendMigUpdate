@@ -37,7 +37,7 @@ Validates system stability after **every individual version jump**, ensuring mod
 - **Mirror & Record:** This automation requirement is recorded in `/memories/auto_migration_policy.md` and mirrored to implementation, planning, and documentation agents.
 
 - **Spec requirement:** The unit-testing agent will ensure every component has a `<component>.component.spec.ts`; it will discover, run, and report on all `*.spec.ts` files during validation and will include a count of missing spec files in the final test report.
-- **Autonomous Completion:** Once tests pass, the unit-testing flow should hand control back to the implementation agent so it can finish the checkpoint and git push without waiting for user intervention.
+- **Autonomous Completion:** Once tests pass, the unit-testing flow should hand control back to the implementation agent so it can finish the checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) and git push without waiting for user intervention.
 
 ### Active Automation Directive
 - When the user issues `implement the migration plan`, the unit-testing agent MUST run targeted and then full test suites for the v17→v18 migration automatically. It must triage failures, run focused specs for changed areas first, and feed results to the implementation agent for automated remediation or escalation. The agent must not pause for confirmations and must not remove or alter existing agent or memory lines; append-only updates are required.
@@ -62,7 +62,7 @@ Validates system stability after **every individual version jump**, ensuring mod
      - `ng test --watch=false` and capture output to `report/test_report.md`
   3. Parse the test output to determine executed/passed spec counts and compare with `total_specs`.
      - If executed spec count < `total_specs` OR any tests fail, mark the step as failed and run targeted diagnostics for failing specs (collect stack traces, failing spec file paths, and output snippets).
-  4. Only when the full-suite run passes and the executed spec count matches `total_specs`, create the migration checkpoint commit ((never use tags n branches for checkpoints; only check commits for checkpoints)) and update the completion status.
+  4. Only when the full-suite run passes and the executed spec count matches `total_specs`, create the migration checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) commit (never use tags n branches for checkpoints; only check commits for checkpoints) and update the completion status.
 
 - Reporting requirement: Always write `report/test_report.md` with:
   - `total_spec_files_counted`, `executed_spec_files`, `passed`, `failed`, and a list of failing spec files with suggested next steps.

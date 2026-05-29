@@ -34,7 +34,7 @@ Note (active policy): For this workspace the implementation agent will only exec
      - **CLI Errors:** Log all CLI migration tool failures.
      - **Asset Mapping:** If dev server fails, verify style/script links in `angular.json` for invalid entries.
      - **Optional Migration Prompts:** When Angular presents an optional migration like the one shown in the build-system prompt screenshot, always select the recommended/default option; if no recommended option exists, select the first option and continue without asking the user.
-    - **Autonomous Finish:** After validation passes, immediately run `git status`, create the commit, and push it to `origin main`. Do NOT create or push tags; represent the v18-stable checkpoint
+    - **Autonomous Finish:** After validation passes, immediately run `git status`, create the commit, and push it to `origin main`. Do NOT create or push tags; represent the v18-stable checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints)
     (never use tags n branches for checkpoints; only check commits for checkpoints) via the commit on `main` only.
    - Run `ng build` to verify every individual jump.
 2. Historical: v20 → v21 Guidance
@@ -45,7 +45,7 @@ Note (active policy): For this workspace the implementation agent will only exec
 3. Log all actions and resulting build statuses.
 
 ### Absolute Rules
-- **Per-Version Plan Sequencing:** The implementation agent MUST read and execute migration plans ONE VERSION AT A TIME. Do NOT attempt all 5 versions in a single execution loop. Workflow: (1) Read `plan/migration_v17_to_v18.md`, (2) Execute all tasks fully, (3) Run `git status`, commit, and push to `origin main` to create a checkpoint (do NOT create or push tags), (4) Then stop unless a new plan is explicitly created. This atomic sequencing prevents catastrophic midway failures and enables rollback to any version.
+- **Per-Version Plan Sequencing:** The implementation agent MUST read and execute migration plans ONE VERSION AT A TIME. Do NOT attempt all 5 versions in a single execution loop. Workflow: (1) Read `plan/migration_v17_to_v18.md`, (2) Execute all tasks fully, (3) Run `git status`, commit, and push to `origin main` to create a checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) (do NOT create or push tags), (4) Then stop unless a new plan is explicitly created. This atomic sequencing prevents catastrophic midway failures and enables rollback to any version.
     1.  **Enter Investigation Mode:** Create a new, timestamped git branch for the failed state (e.g., `migration-failure/v17-to-v18-some-error-20260511T103000Z`).
     2.  **Log Detailed Diagnostics:** Write a comprehensive failure report to `report/implementation_log.md`, including the exact error message, the 3 strategies that were attempted, and the state of the relevant files.
     3.  **Halt and Escalate:** The agent will halt the migration process and report that it has encountered a novel issue that requires a new strategy or agent update to be developed, pointing to the failure branch and the detailed log. This respects the "no user intervention" rule for the migration itself but allows for a "meta-intervention" to improve the agent for the future.
@@ -57,7 +57,7 @@ Note (active policy): For this workspace the implementation agent will only exec
 - **Manual GitHub Updates:** The agent is responsible for pushing all successful commits to the remote GitHub repository automatically.
 - **Mandatory Post-Migration Git:** After each successful version migration, the agent must immediately run `git status`, create the commit, and push it before starting the next version. If a crisis occurs after a version is done, the git command still must happen.
 - **Zero User Intervention:** The agent must not ask the user to approve routine migration, validation, or git operations; it must complete the version jump end-to-end on its own and report only blockers or final status.
-- **Post-Commit Recovery Check:**After every version jump is committed and pushed, the agent must verify the  state and continue from that checkpoint instead of silently skipping ahead.(never use tags n branches for checkpoints; only check commits for checkpoints)
+- **Post-Commit Recovery Check:**After every version jump is committed and pushed, the agent must verify the  state and continue from that checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) instead of silently skipping ahead.(never use tags n branches for checkpoints; only check commits for checkpoints)
 
 
 ### Active Automation Directive
@@ -71,9 +71,9 @@ Note (active policy): For this workspace the implementation agent will only exec
 - If any step fails and cannot be resolved automatically, the agent must record the blocker and the next recovery move in `report/implementation_log.md` and halt. The agent must not prompt the user for decisions during error handling — it should select the default recovery option and proceed when safe.
 - The Implementation Agent will update `report/implementation_log.md` with the final status, checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) commit hash, and a per-component summary of changes applied.
 
-### Checkpoint & Branching Addendum (Commit-only)
+### Checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) & Branching Addendum (Commit-only)
 
-- Commit-only checkpoints: The implementation agent MUST NOT create or push git tags or use branches as migration checkpoints(never use tags n branches for checkpoints; only check commits for checkpoints). Instead:
+- Commit-only checkpoints(never use tags n branches for checkpoints; only check commits for checkpoints): The implementation agent MUST NOT create or push git tags or use branches as migration checkpoints(never use tags n branches for checkpoints; only check commits for checkpoints). Instead:
   1. Create a single commit on `main` with a conventional message: `git add -A && git commit -m "chore(migration): complete Angular v18"`.
   2. Push the commit: `git push origin HEAD`.
   3. Record the checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) using `git_checkpoint_commit` (short hash) and `git_checkpoint_message` in `report/implementation_log.md`.
@@ -106,4 +106,4 @@ Note (active policy): For this workspace the implementation agent will only exec
 - **Total Components Migrated:** (updated as implementation finishes component-level fixes)
 - **Files Modified:** (list generated by the implementation run)
 - **Build Status:** (last build result and key warnings/errors)
-- **Git Checkpoint:** checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) commit hash when the final jump is successful
+- **Git Checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints):** checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) commit hash when the final jump is successful

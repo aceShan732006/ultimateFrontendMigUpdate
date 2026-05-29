@@ -16,13 +16,13 @@ This agent is now authoritative for Angular **v17 -> v18 only** in this workspac
 - **No-Stall Rule:** Ensure that the planning process does not stall by continuously assessing progress and adjusting tasks as necessary.
 - **Git After Version Rule:** After each version upgrade, enforce a check to ensure that the latest changes are committed and pushed to the repository.(never use tags n branches for checkpoints; only check commits for checkpoints)
 
-Note: In this workspace the "version rule" applies to the v16→v17 checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints). Further version checkpoints are historical recommendations.
+Note: In this workspace the "version rule" applies to the v16→v17 checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints). Further version checkpoints(never use tags n branches for checkpoints; only check commits for checkpoints) are historical recommendations.
 
 ### Planning Addendum
 - Keep the optional migration prompt on automatic default selection mode at all times.
 - Treat any migration-related build warning as a required cleanup item or explicit follow-up.
 - Require git status, commit, and push immediately after each successful version jump.
-- The planner must not wait for user confirmation to begin, continue, or finish the v17→v18 plan; the autonomous run should end in a git checkpoint.
+- The planner must not wait for user confirmation to begin, continue, or finish the v17→v18 plan; the autonomous run should end in a git checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints).
    - Assign risk levels and effort estimations to each task based on manual step complexity.
   - Define validation gates (build/test verification) for the **v17 -> v18** migration. (Historical: multi-version gates are documented for larger migrations.)
    - **SEQUENCING & RISK PLANNING (Timing Focus):**
@@ -42,7 +42,7 @@ The Planning Agent's first responsibility is to ingest the `assessment_report.md
 ### Per-Version Migration Plans (Markdown):
   - Active (v17→v18): generate `plan/migration_v17_to_v18.md` — v17→v18 migration with its own gates, rollback, and success criteria.
   - **CRITICAL (active rule)**: The v17→v18 plan file must be ATOMIC and INDEPENDENT. No cross-version dependencies should be introduced into the active plan.
-  - Each plan includes: Phase breakdown, validation gates, rollback triggers, git checkpoint names(never use tags n branches for checkpoints; only check commits for checkpoints), success criteria, specific file changes for THAT version only.
+  - Each plan includes: Phase breakdown, validation gates, rollback triggers, git checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) names(never use tags n branches for checkpoints; only check commits for checkpoints), success criteria, specific file changes for THAT version only.
   - Each plan must explicitly state which version it targets and the next version to attempt after success.
 ### Master Index (Markdown):
   - Generated in `plan/migration_plan.md` — Lists all version-specific plans with brief descriptions.
@@ -61,12 +61,12 @@ This agent is now authoritative for Angular **v17 -> v18 only** in this workspac
 ### Phased Migration Strategy
 #### Phase 1: Angular Core Updates
 - **Objective:** Update all official `@angular/*` packages to the next target version.
-Note: In this workspace the "version rule" applies to the v17→v18 checkpoint. Further version checkpoints are historical recommendations.
+Note: In this workspace the "version rule" applies to the v17→v18 checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints). Further version checkpoints(never use tags n branches for checkpoints; only check commits for checkpoints) are historical recommendations.
     - Run `ng update @angular/core @angular/cli` for the target version.
     - Validate that `package.json` reflects the correct versions.
 - **Tasks:**
   - Define validation gates (build/test verification) for the **v17 -> v18** migration. (Historical: multi-version gates are documented for larger migrations.)
-  - The planner must not wait for user confirmation to begin, continue, or finish the v17→v18 plan; the autonomous run should end in a git checkpoint.
+  - The planner must not wait for user confirmation to begin, continue, or finish the v17→v18 plan; the autonomous run should end in a git checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints).
     - Test critical functionality involving these libraries.
 
 #### Phase 2: Third-Party Dependency Updates
@@ -118,7 +118,7 @@ Note: In this workspace the "version rule" applies to the v17→v18 checkpoint. 
 A robust rollback strategy is critical for maintaining stability during a complex migration. The following provides a more detailed and practical approach to handling rollbacks cleanly.
 
 - **Granular Commits:** Each migration step (e.g., a single version jump, a major refactor) must be contained in its own atomic commit. This allows for precise rollbacks without losing unrelated work.
-- **Branching Model:** Instead of using tags for checkpoints(never use tags n branches for checkpoints; only check commits for checkpoints), the agent should commit to the main branch n not extra branches with clear commit messages that indicate the checkpoint. This way, the commit history itself serves as the checkpoint system.
+- **Branching Model:** Instead of using tags for checkpoints(never use tags n branches for checkpoints; only check commits for checkpoints), the agent should commit to the main branch n not extra branches with clear commit messages that indicate the checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints). This way, the commit history itself serves as the checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) system.
 - **Clean Reversion with `git revert`:**
   - Instead of `git reset`, which rewrites history, use `git revert`. This creates a new commit that undoes the changes from a previous commit.
   - **Handling Merge Conflicts during Revert:** If a revert causes conflicts, it's often because subsequent commits have modified the same code.
@@ -130,7 +130,7 @@ A robust rollback strategy is critical for maintaining stability during a comple
     - 3. **Clean the workspace:** `rimraf node_modules package-lock.json dist`
     - 4. **Reinstall:** `npm install`
   - This approach is destructive but guarantees a clean slate. It should be used as a last resort when `git revert` is too complex.
-- **Automated Rollback Scripts:** For a fully automated process, the implementation agent should have the ability to generate and execute a rollback script based on the current migration phase. The script would use the `checkpoint` commits (never use tags n branches for checkpoints; only check commits for checkpoints) to revert the codebase to the last stable state.
+- **Automated Rollback Scripts:** For a fully automated process, the implementation agent should have the ability to generate and execute a rollback script based on the current migration phase. The script would use the `checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints)` commits (never use tags n branches for checkpoints; only check commits for checkpoints) to revert the codebase to the last stable state.
 - **100% Test Suite Pass Rate:** All unit and end-to-end tests must pass. Test coverage should not decrease.
 - **Zero Regression:** All primary features and critical user flows of the application must be fully functional and visually identical to the pre-migration state.
 - **100% Component, Module, and Import Migration:** All components, modules, and imports must be fully migrated to the target version's standards. This includes:
@@ -155,7 +155,7 @@ A robust rollback strategy is critical for maintaining stability during a comple
 
 
 ### Active Automation Directive
-- When the user issues `implement the migration plan`, the planning agent MUST generate or validate the `plan/migration_v17_to_v18.md` per-component checklist and ensure the plan enforces end-to-end autonomous execution. The planning agent must mark required validation gates, git checkpoint steps(never use tags n branches for checkpoints; only check commits for checkpoints), and rollback procedures. The agent must not pause for confirmations and must not remove or alter existing agent or memory lines; append-only updates are required.
+- When the user issues `implement the migration plan`, the planning agent MUST generate or validate the `plan/migration_v17_to_v18.md` per-component checklist and ensure the plan enforces end-to-end autonomous execution. The planning agent must mark required validation gates, git checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) steps(never use tags n branches for checkpoints; only check commits for checkpoints), and rollback procedures. The agent must not pause for confirmations and must not remove or alter existing agent or memory lines; append-only updates are required.
 
 ### Final Report and Execution Plan
 The final output is the `migration_plan.md`, which includes:
@@ -170,9 +170,9 @@ The final output is the `migration_plan.md`, which includes:
 - **Trigger:** A failure is defined as an unresolvable build error or a critical test failure that cannot be fixed within a predefined time limit.
 - **Looping for Success:** If a rollback occurs, the process does not terminate. The agent will re-evaluate the failed step, adjust the plan, and re-attempt the migration. This loop continues until the migration for that version is successfully achieved or the escalation protocol is triggered.
 
-### Checkpoint & Rollback Addendum (Commit-first policy)
+### Checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) & Rollback Addendum (Commit-first policy)
 
-- Policy: The authoritative migration checkpoint must be a commit on `main` (commit message + commit hash). Do NOT create or rely on git tags as the canonical checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints).
+- Policy: The authoritative migration checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) must be a commit on `main` (commit message + commit hash). Do NOT create or rely on git tags as the canonical checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints).
 - Automated rollback guidance:
   1. Locate the checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) commit by commit message: `git rev-list -n 1 --grep="chore(migration): complete Angular v18" --all`
   2. Reset to the checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) commit: `git reset --hard <commit-hash>`

@@ -8,7 +8,7 @@ Evaluates the current project for its readiness to undergo the active, increment
 This agent is now authoritative for Angular **v17 -> v18 only** in this workspace specialization. Keep the existing guidance below as historical context, but apply it only to the v17 -> v18 migration path.
 
 ### Focused Purpose & Rationale
-This agent now focuses on assessing readiness for the single, atomic upgrade from Angular **v17 → v18**. The historical multi-version guidance exists because migrating multiple major versions at once increases risk: smaller, version-by-version upgrades reduce the surface area of change, simplify debugging, and provide clear git checkpoints for rollback. Apply the checks below primarily to the v17→v18 jump unless a new, explicit plan asks for additional version steps.
+This agent now focuses on assessing readiness for the single, atomic upgrade from Angular **v17 → v18**. The historical multi-version guidance exists because migrating multiple major versions at once increases risk: smaller, version-by-version upgrades reduce the surface area of change, simplify debugging, and provide clear git checkpoints(never use tags n branches for checkpoints; only check commits for checkpoints) for rollback. Apply the checks below primarily to the v17→v18 jump unless a new, explicit plan asks for additional version steps.
 
 ### Responsibilities
 - **Incremental Sequence Audit:** Analyze `package.json`, `angular.json`, and `tsconfig.json` for legacy patterns relevant to the active v16→v17 jump.
@@ -17,7 +17,7 @@ This agent now focuses on assessing readiness for the single, atomic upgrade fro
 - **Manual Verification:** Explicitly check for all manual conversion steps listed in the provided migration manual for every phase.
 - **Workflow Enforcement (active):** Strictly validate that the project follows the v17 → v18 path for this workspace; stop if that jump is skipped. (Historical multi-version enforcement retained as reference.)
 
-Note (active policy): For this workspace the active enforcement is to validate the single v17 → v18 jump and create a git checkpoint
+Note (active policy): For this workspace the active enforcement is to validate the single v17 → v18 jump and create a git checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints)
 (never use tags n branches for checkpoints; only check commits for checkpoints) on success
 - **Crisis Progress Reporting:** If analysis stalls or goes blank, immediately report the blocker and the next recovery move before continuing with the smallest viable action.
 - **Warning Review:** Capture migration-related build warnings as part of the assessment so they can be tracked and removed instead of being carried forward unnoticed.
@@ -71,14 +71,14 @@ The assessment agent is responsible for creating a complete inventory of the pro
 - **Report Generation:** The collected data will be structured and included in the `assessment_report.md` under a new "Project Inventory" section. This provides a single source of truth for the planning agent.
 ---
 
-### Checkpoint Policy Addendum (Commit-only)
+### Checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) Policy Addendum (Commit-only)
 
-- Purpose: The authoritative migration checkpoint is the commit on `main` (commit message + commit hash). Do NOT create git tags or treat a tag as the canonical checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints)
+- Purpose: The authoritative migration checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) is the commit on `main` (commit message + commit hash). Do NOT create git tags or treat a tag as the canonical checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints)
 - When this file or any report references `git_checkpoint_tag` (for human readability), the agent must:
   1. Create a commit with a clear, conventional message (example: `chore(migration): complete Angular v18`).
   2. Push the commit to the remote: `git push origin HEAD`.
-  3. Record the authoritative checkpoint as `git_checkpoint_commit` (short hash) and `git_checkpoint_message` in the assessment report and implementation logs.
-  4. Treat any existing human-friendly checkpoint label as informational only; compute and use the corresponding commit hash (store as `git_checkpoint_commit`) for automation. Do not create or push git tags for migration checkpoints.(never use tags n branches for checkpoints; only check commits for checkpoints)
+  3. Record the authoritative checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) as `git_checkpoint_commit` (short hash) and `git_checkpoint_message` in the assessment report and implementation logs.
+  4. Treat any existing human-friendly checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) label as informational only; compute and use the corresponding commit hash (store as `git_checkpoint_commit`) for automation. Do not create or push git tags for migration checkpoints(never use tags n branches for checkpoints; only check commits for checkpoints).(never use tags n branches for checkpoints; only check commits for checkpoints)
 
 Example record to include in `report/assessment_report.md`:
 
