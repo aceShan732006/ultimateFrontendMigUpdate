@@ -46,3 +46,9 @@ Testing a component that uses an async operation inside `ngOnInit` after migrati
 The issue was resolved by ensuring that all asynchronous operations within the `fakeAsync` zone were properly flushed. The solution was to wrap the trigger for the async operation in `TestBed.runInInjectionContext` and ensure `tick()` was called after the async operation was initiated.
 ```
 ---
+### Orchestration Polish & Actionability
+- **Minor Orchestration Polish:** Ensure automated hand-offs between assessment, planning, implementation, testing, and documentation are flawlessly executed. Maintain near perfection in error recovery and state management.
+- **Atomic & Actionable Outputs:** All generated plans and reports must be atomic, isolated per version, and actionable.
+- **Richer Diagnostics & File-Level Diffs:** Include comprehensive diagnostics on any failure. Retain file-level diffs (unified patches) to provide clear visibility into modifications.
+- **Remediation Steps:** Alongside any identified error or warning, explicitly document the specific remediation steps required to resolve the issue.
+
