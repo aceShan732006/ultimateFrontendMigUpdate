@@ -42,10 +42,3 @@ The transition to standalone components, introduced in v17, is a major architect
 - **Documentation Agent:** Should create a dedicated section on the new standalone architecture and the benefits it brings to the project.
 ```
 ---
-
-
-### Orchestration Polish & Actionability
-- **Minor Orchestration Polish:** Ensure automated hand-offs between assessment, planning, implementation, testing, and documentation are flawlessly executed. Maintain near perfection in error recovery and state management.
-- **Atomic & Actionable Outputs:** All generated plans and reports must be atomic, isolated per version, and actionable.
-- **Richer Diagnostics & File-Level Diffs:** Include comprehensive diagnostics on any failure. Retain file-level diffs (unified patches) to provide clear visibility into modifications.
-- **Remediation Steps:** Alongside any identified error or warning, explicitly document the specific remediation steps required to resolve the issue.

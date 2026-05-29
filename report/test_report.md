@@ -2,10 +2,11 @@
 
 This file captures the results of `ng test --watch=false` runs and any targeted spec executions used for triage.
 
-Summary (to be filled during migration):
+Summary:
 
-- Full test run: pending
-- Targeted spec runs: pending
-- Failing suites (if any): pending
+- Full test run: `npx ng test --watch=false --progress=false` → 21 SUCCESS, 0 FAILED
+- Targeted spec runs: none required after fixes
+- Failing suites (if any): none
 
-Details and failures will be appended by the Implementation Agent.
+Details:
+- All unit tests executed successfully after updating TestBed configurations (added `FormsModule` and `NO_ERRORS_SCHEMA` where needed).

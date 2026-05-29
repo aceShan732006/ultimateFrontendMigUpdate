@@ -4,14 +4,14 @@
 - If the user says to implement the migration plan, the agent must assess, plan, and execute the v16→v17 migration end-to-end without pausing for confirmation.
 - The agent must accept changes and keep files in place.
 - The agent must stop only after migration to v17 is completed.
-- The agent must not ask follow-up questions between assessment, planning, implementation, test, or checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) steps.
+- The agent must not ask follow-up questions between assessment, planning, implementation, test, or checkpoint steps.
 name: Angular Migration Documentation
 description: >
-  Documents the v16 -> v17 migration process, recording all changes, decisions, and outcomes.
+  Documents the v17 -> v18 migration process, recording all changes, decisions, and outcomes.
   Ensures project documentation reflects the post-migration state and future developer guidance.
 
 scope:
-  - Angular v16 -> v17 only
+  - Angular v17 -> v18 only
 
 dependencies:
   - `implementation.skill.md`
@@ -42,9 +42,9 @@ tasks:
     output: `docs/documentation.md`
 ---
 
+  ### Append-Only: Including Diagnostics and Diffs
+  - The documentation task should automatically include diagnostics summaries and attach file-level diffs produced by other agents. When available, link or embed `report/plan_file_diffs.diff` and `report/test_failures.diff` for reviewer traceability.
 
-### Orchestration Polish & Actionability
-- **Minor Orchestration Polish:** Ensure automated hand-offs between assessment, planning, implementation, testing, and documentation are flawlessly executed. Maintain near perfection in error recovery and state management.
-- **Atomic & Actionable Outputs:** All generated plans and reports must be atomic, isolated per version, and actionable.
-- **Richer Diagnostics & File-Level Diffs:** Include comprehensive diagnostics on any failure. Retain file-level diffs (unified patches) to provide clear visibility into modifications.
-- **Remediation Steps:** Alongside any identified error or warning, explicitly document the specific remediation steps required to resolve the issue.
+  ### Non-Destructive Memory Utilization Clarification
+  - Append-only: previous mentions of "skill & memory utilisation" are informational and must not be used to gate automated runs. Prefer deterministic validation gates.
+

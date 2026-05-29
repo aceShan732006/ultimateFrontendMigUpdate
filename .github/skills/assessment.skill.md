@@ -4,15 +4,15 @@
 - If the user says to implement the migration plan, the agent must assess, plan, and execute the v16→v17 migration end-to-end without pausing for confirmation.
 - The agent must accept changes and keep files in place.
 - The agent must stop only after migration to v17 is completed.
-- The agent must not ask follow-up questions between assessment, planning, implementation, test, or checkpoint(never use tags n branches for checkpoints; only check commits for checkpoints) steps.
+- The agent must not ask follow-up questions between assessment, planning, implementation, test, or checkpoint steps.
 name: Angular Migration Assessment
 description: >
-  Analyzes an Angular project to assess its readiness for the v16 -> v17 migration.
+  Analyzes an Angular project to assess its readiness for the v17 -> v18 migration.
   Identifies legacy patterns, dependency issues, and configuration problems that could block the upgrade.
   Generates a detailed assessment report as the foundation for the planning phase.
 
 scope:
-  - Angular v16 -> v17 only
+  - Angular v17 -> v18 only
 
 tasks:
   - task: Analyze `package.json` for outdated `@angular/*` packages and third-party dependencies.
@@ -47,15 +47,12 @@ tasks:
       - The report must include a checklist of all identified issues.
       - Save the report to `report/assessment_report.md`.
     output: `report/assessment_report.md`
-  - task: Run security and Node compatibility checks.
-    instructions:
-      - Run `npm audit --json` and include a short, human-readable summary in the assessment report.
-      - Inspect `package.json` for `engines.node` and compare with the local Node runtime; record mismatches and suggested non-invasive workarounds.
-    output: `report/assessment_report.md`
+---
 
+  ### Append-Only: Diagnostics & Zone/Node Guidance
+  - The assessment should include clear, file-level diagnostics for risky patterns and produce `report/assessment_diagnostics.md` describing file-level diffs and remediation suggestions for flagged files.
+  - Add a non-strict Node compatibility check and include its findings in the assessment report (`report/node_version.txt`), recommending Node 18.x/20.x when relevant.
 
-### Orchestration Polish & Actionability
-- **Minor Orchestration Polish:** Ensure automated hand-offs between assessment, planning, implementation, testing, and documentation are flawlessly executed. Maintain near perfection in error recovery and state management.
-- **Atomic & Actionable Outputs:** All generated plans and reports must be atomic, isolated per version, and actionable.
-- **Richer Diagnostics & File-Level Diffs:** Include comprehensive diagnostics on any failure. Retain file-level diffs (unified patches) to provide clear visibility into modifications.
-- **Remediation Steps:** Alongside any identified error or warning, explicitly document the specific remediation steps required to resolve the issue.
+  ### Non-Destructive Memory Utilization Clarification
+  - Append-only clarification: earlier notes about "skill & memory utilisation" remain in the file for historical context; do not depend on ephemeral memory metrics for gating decisions.
+
