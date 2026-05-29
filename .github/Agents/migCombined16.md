@@ -2,12 +2,8 @@
 
 This file contains the combined logic, responsibilities, and workflows of all migration sub-agents, specialized for the active v17→v18 migration in this workspace.
 
-### Historical Title
-The original file was titled "Combined Migration Agent (v16 → v21)" and retained below for historical/contextual reference. The broader multi-version content is preserved but the active execution path must stop at v17.
-
 ### Scope Specialization
-This combined agent is now authoritative for Angular **v17 -> v18 only** in this workspace specialization. The broader v16 -> v21 wording remains for reference, but the active execution path must stop at v18.
-
+This combined agent is now authoritative for Angular **v17 -> v18 only** in this workspace specialization. 
 
 ## SECTION 7: MASTER MIGRATION AGENT
 # Migration Agent (Angular 17 → 18)
@@ -32,7 +28,7 @@ A master agent that orchestrates the entire migration process from Angular 17 to
 - **Automatic Continuation:** If an optional Angular migration prompt appears, select the recommended/default option automatically and continue without user interaction.
 - **Crisis Next-Step Reporting:** If the process stalls or goes blank, the master agent must output the blocker and the next recovery move immediately, then continue with the smallest viable action.
 - **Build Warning Escalation:** Build warnings that affect the migration path must be surfaced as actionable defects, not suppressed or ignored.
-- **Git Completion Reminder:** After every successful version jump, the master agent must require `git status`, commit, and push to `origin main` to complete the checkpoint (do NOT create or push tags) before any next-version work begins.
+- **Git Completion Reminder:** After every successful version jump, the master agent must require git status, commit, and push before any next-version work begins.
 - **No-Intervention Mandate:** The master agent must start, continue, and finish the active v17→v18 migration without asking the user to approve routine steps.
 
 ### Centralized Orchestration and Control
@@ -53,20 +49,7 @@ Within this combined framework, the implementation logic is enhanced with greate
 - **Testing Triage:** When the unit test suite is too broad or a full run fails many modules at once, the Master Agent should direct the testing agent to run targeted specs for the changed area first, then expand outward only after the focused checks pass.
 
 
-### Orchestration Polish & Diagnostics (Append-only)
-- The master agent must:
-	- Log the start and end of each agent invocation with timestamps and the triggering event.
-	- For each agent hand-off, record the input and output artifact filenames and a short status summary (success/failure/blocker).
-	- On any validation failure, produce a diagnostics bundle containing:
-		- The triggering command and error summary
-		- File-level diffs (`report/plan_file_diffs.diff`, `report/test_failures.diff`, etc.)
-		- Remediation steps and effort estimates
-		- A vulnerability summary if available
-	- Ensure all diagnostics and remediation artifacts are referenced in the final `report/migration_report.md`.
-
-### Non-Destructive Memory Utilization Clarification
-- Any prior references to "skill & memory utilisation" in orchestration or agent notes are informational only. Do not use ephemeral memory metrics as gating signals; prefer deterministic validation gates (build/test/lint) for all automation decisions.
-
+### Unified Management of All Agents
 
 - **Assessment Agent Management:** The Master Agent triggers the `assessment.md` logic to produce the initial `assessment_report.md`. It validates the report for completeness before proceeding.
 - **Planning Agent Management:** It feeds the assessment report to the `planning.md` logic and receives the `migration_plan.md`. The Master Agent cross-references the plan against the assessment to ensure all identified issues are addressed.
@@ -75,11 +58,17 @@ Within this combined framework, the implementation logic is enhanced with greate
 - **Documentation Agent Management:** The Master Agent continuously provides the `documentation.md` logic with logs and summaries from all other agents, ensuring that the `documentation.md` file is a complete and accurate record of the entire migration process.
 
 
-### User Preference: Full Migration Autopilot
-- If the user says to implement the migration plan, the agent must assess, plan, and execute the v16→v17 migration end-to-end without pausing for confirmation.
-- The agent must accept changes and keep files in place.
-- The agent must stop only after migration to v17 is completed.
-- The agent must not ask follow-up questions between assessment, planning, implementation, test, or checkpoint steps.
+### Active Automation Directive
+	- The Master Migration Agent (combined agent) MUST, on `implement the migration plan`, orchestrate the assessment, planning, implementation, testing, and documentation agents to perform the v17→v18 migration fully autonomously. It must ensure the system accepts code changes, commits and pushes checkpoints (never use tags n branches for checkpoints; only check commits for checkpoints) and records the authoritative checkpoint as `git_checkpoint_commit` (short hash) together with `git_checkpoint_message`, and reports final status without pausing for user interaction. Do not remove or alter existing agent or memory lines; append-only updates are required.
+
+### Checkpoint Policy Addendum (Master Agent)
+
+	1. Ensure sub-agents create a commit with a conventional message (e.g., `chore(migration): complete Angular v18`).
+	2. Verify the commit is pushed: `git push origin HEAD`.
+	3. Record `git_checkpoint_commit` and `git_checkpoint_message` in `report/migration_report.md`.(never use tags n branches for checkpoints; only check commits for checkpoints)
+
+- Any reference to a human-friendly checkpoint label in this file is informational only. The Master Agent must compute and record the corresponding commit hash as `git_checkpoint_commit` for automated operations and must not rely on tags as checkpoints(never use tags n branches for checkpoints; only check commits for checkpoints).
+- Any reference to a human-friendly checkpoint label in this file is informational only. The Master Agent must compute and record the corresponding commit hash as `git_checkpoint_commit` for automated operations and must not rely on tags as checkpoints(never use tags n branches for checkpoints; only check commits for checkpoints).
 
 ### AUTOMATION ENFORCEMENT (Added)
 - **Autonomy mandate (must do):** The master migration agent must orchestrate a fully autonomous v17→v18 migration run when requested by the user. This includes sequencing assessment, planning, implementation, testing, and documentation without requiring human intervention, and performing git checkpointing and pushes as part of the automated flow.
@@ -88,16 +77,15 @@ Within this combined framework, the implementation logic is enhanced with greate
 - **No prompts:** Default/recommended options must be chosen automatically for any presented prompts during the automated flow.
 - **Mirror & Record:** This automation policy is recorded in `/memories/auto_migration_policy.md` and mirrored to all sub-agent artifacts.
 
+### Orchestration Polish & Actionability
+- **Minor Orchestration Polish:** Ensure automated hand-offs between assessment, planning, implementation, testing, and documentation are flawlessly executed. Maintain near perfection in error recovery and state management.
+- **Atomic & Actionable Outputs:** All generated plans and reports must be atomic, isolated per version, and actionable.
+- **Richer Diagnostics & File-Level Diffs:** Include comprehensive diagnostics on any failure. Retain file-level diffs (unified patches) to provide clear visibility into modifications.
+- **Remediation Steps:** Alongside any identified error or warning, explicitly document the specific remediation steps required to resolve the issue.
 
 ### must include OUTPUT
-- **Report:** `report/migration_report.md` (master combined migration summary)
-- **Total number of components present:** (agent-discovered integer)
-- **Total number of components migrated:** (agent-updated integer)
-- **Total number of components pending migration:** (agent-computed integer)
-- **Migration completion percentage:** (computed as migrated/total * 100)
-- **Spec files present:** (number of `*.spec.ts` found across the repo)
-- **Spec files missing:** (number of components without `*.spec.ts`)
-- **Timestamp:** (ISO 8601 UTC for the snapshot)
-- **Core details:** aggregated list of blockers, high-risk modules, and final verification status for build/test/runtime.
-
-- **Spec requirement:** The combined agent enforces that every component includes a `<component>.component.spec.ts` and that the unit-testing agent discovers and runs all `*.spec.ts` during validation.
+- **Master Migration Report (file):** report/migration_report.md
+- **Total Components Present (project):** (aggregated from assessment inventory)
+- **Total Components Migrated (project):** (aggregated from implementation logs)
+- **Overall Migration Completion Percentage:** (computed from aggregated metrics)
+- **Per-Agent Outputs:** assessment_report.md, css_report.md, implementation_log.md, test_report.md, docs/documentation.md
